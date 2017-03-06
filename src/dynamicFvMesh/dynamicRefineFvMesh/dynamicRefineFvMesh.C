@@ -436,7 +436,10 @@ Foam::dynamicRefineFvMesh::refine
         }
     }
 
-
+    //- map non-flux surface<Type>Fields for newly created internal faces
+    const labelList& faceMap = map().faceMap();
+    mapNewInternalFaces<scalar>( faceMap );
+    mapNewInternalFaces<vector>( faceMap );
 
     // Update numbering of cells/vertices.
     meshCutter_.updateMesh(map);
@@ -989,6 +992,118 @@ void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
         {
             protectedCell.set(celli, true);
             nProtected++;
+        }
+    }
+}
+
+
+template <class T>
+void Foam::dynamicRefineFvMesh::mapNewInternalFaces
+(
+    const labelList& faceMap
+)
+{
+    typedef GeometricField<T, fvsPatchField, surfaceMesh> GeoField;
+    HashTable< GeoField*> sFlds(this->objectRegistry::lookupClass<GeoField>());
+
+    const unallocLabelList& owner = this->owner();
+    const unallocLabelList& neighbour = this->neighbour();
+    const dimensionedScalar deltaN = 1e-8 / pow(average(this->V()), 1.0 / 3.0);
+
+    forAllIter(typename HashTable<GeoField*>, sFlds, iter)
+    {
+
+        GeoField& sFld = *iter();
+        if (mapSurfaceFields_.found(iter.key()))
+        {
+
+            Field<T> tsFld(this->nFaces(), pTraits<T>::zero);
+            forAll(sFld.internalField(), iFace)
+            {
+                tsFld[iFace] = sFld.internalField()[iFace];
+            }
+            forAll(sFld.boundaryField(), iPatch)
+            {
+                label globalIdx = this->boundaryMesh()[iPatch].start();
+                forAll(sFld.boundaryField()[iPatch], faceI)
+                {
+                    tsFld[faceI+globalIdx] = sFld.boundaryField()[iPatch][faceI];
+                }
+            }
+
+            //- loop over all faces
+            for (label facei = 0; facei < nInternalFaces(); facei++)
+            {
+                label oldFacei = faceMap[facei];
+
+                //- map surface field on newly generated faces
+                if (oldFacei == -1)
+                {
+                    //- find owner and neighbour cell
+                    cell faceOwner = this->cells()[owner[facei]];
+                    cell faceNeighbour = this->cells()[neighbour[facei]];
+
+                    //- loop over all owner/neighbour cell faces
+                    //- and find already mapped ones (master-faces):
+                    T tmpValue = pTraits<T>::zero;
+                    scalar magFld = 0;
+                    label counter = 0;
+
+                    //- simple averaging of all neighbour master-faces
+                    forAll(faceOwner, iFace)
+                    {
+                        if (faceMap[faceOwner[iFace]] != -1)
+                        {
+                            tmpValue += tsFld[faceOwner[iFace]];
+                            magFld += mag(tsFld[faceOwner[iFace]]);
+                            counter++;
+                        }
+                    }
+
+                    forAll(faceNeighbour, iFace)
+                    {
+                        if (faceMap[faceNeighbour[iFace]] != -1)
+                        {
+
+                            tmpValue = tmpValue + tsFld[faceNeighbour[iFace]];
+                            magFld += mag(tsFld[faceNeighbour[iFace]]);
+                            counter++;
+                        }
+                    }
+
+                    if(counter > 0)
+                    {
+                        if 
+                        (   
+                            GeometricField<T, fvsPatchField, surfaceMesh>::typeName 
+                                == "surfaceScalarField"
+                        )
+                        {
+                            tmpValue /= counter;
+                        }                            
+                        else if 
+                        (    
+                            GeometricField<T, fvsPatchField, surfaceMesh>::typeName 
+                                == "surfaceVectorField"
+                        )
+                        {
+                            magFld /= counter;
+                            tmpValue *= magFld/(mag(tmpValue)+deltaN.value());
+                        }
+                        else
+                        {
+                            FatalErrorInFunction
+                                << "mapping implementation only valid for"
+                                << " scalar and vector fields! \n Field "
+                                << sFld.name() << " is of type: "
+                                << GeometricField<T, fvsPatchField, surfaceMesh>::typeName 
+                                << abort(FatalError);
+                        }
+                    }
+
+                    sFld[facei] = tmpValue;
+                }
+            }
         }
     }
 }

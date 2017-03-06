@@ -198,26 +198,35 @@ Foam::label Foam::hexRef8::addInternalFace
     const label nei
 ) const
 {
-    if (mesh_.isInternalFace(meshFacei))
-    {
-        return meshMod.setAction
-        (
-            polyAddFace
-            (
-                newFace,                    // face
-                own,                        // owner
-                nei,                        // neighbour
-                -1,                         // master point
-                -1,                         // master edge
-                meshFacei,                  // master face for addition
-                false,                      // flux flip
-                -1,                         // patch for face
-                -1,                         // zone for face
-                false                       // face zone flip
-            )
-        );
-    }
-    else
+/////////////////////////////////////////////////////////////////////////////////
+// D. Deising & D. Rettenmaier
+// Sets internalFaces falsly as masterFaces so internal face adressing gets mixed 
+// up. addInternalFace() is only called inside HexRef8, we expect no problems by 
+// commenting this case.
+
+// TODO: Check if commenting this case breaks any other functionality
+
+    // if (mesh_.isInternalFace(meshFacei))
+    // {
+    //    return meshMod.setAction
+    //    (
+    //        polyAddFace
+    //        (
+    //            newFace,                    // face
+    //            own,                        // owner
+    //            nei,                        // neighbour
+    //            -1,                         // master point
+    //            -1,                         // master edge
+    //             meshFacei,                  // master face for addition
+    //             false,                      // flux flip
+    //             -1,                         // patch for face
+    //             -1,                         // zone for face
+    //             false                       // face zone flip
+    //         )
+    //     );
+    // }
+    // else
+/////////////////////////////////////////////////////////////////////////////////
     {
         // Two choices:
         // - append (i.e. create out of nothing - will not be mapped)

@@ -56,6 +56,15 @@ Description
             (rho*phi none)   //none)
             (ghf none)  //NaN)   //none)
         );
+
+        // List of non-flux surface<Type>Fields to be mapped
+        // only for new internal faces (AMR refine)
+        mapSurfaceFields
+        (
+            Uf
+            Uf_0
+        );
+
         // Write the refinement level as a volScalarField
         dumpLevel       true;
 
@@ -96,6 +105,9 @@ protected:
 
         //- Fluxes to map
         HashTable<word> correctFluxes_;
+
+        //- SurfaceFiels to map
+        HashTable<word> mapSurfaceFields_;
 
         //- Number of refinement/unrefinement steps done so far.
         label nRefinementIterations_;
@@ -185,6 +197,11 @@ protected:
                 PackedBoolList& protectedCell,
                 label& nProtected
             ) const;
+
+            //- map non-flux surface<Type>Fields 
+            // for new internal faces (AMR refine)
+            template <class T>
+            void mapNewInternalFaces(const labelList& faceMap);
 
 private:
 

@@ -108,6 +108,14 @@ dynamicRefineFvMeshCoeffs
         (rho*phi none)
         (ghf none)
     );
+
+    // List of non-flux surface<Type>Fields to be mapped
+    // only for new internal faces (AMR refine)
+    mapSurfaceFields
+    (
+        Uf
+        Uf_0
+    );
     
     // Write the refinement level as a volScalarField
     dumpLevel       true;

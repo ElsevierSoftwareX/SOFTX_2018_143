@@ -346,6 +346,26 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
     const bool negateIfFlipped
 ) const
 {
+
+////////////////////////////////////////////////////////////////////////
+// Daniel Deising, Daniel Rettenmaier
+// surfaceVectorFields must not be flipped when send to a new processor
+
+// TODO: Generalize
+    if(std::is_same<Type, vector>::value )
+    {
+        return interpolate
+        (
+            sf,
+            subMesh(),
+            patchMap(),
+            cellMap(),
+            faceMap(),
+            false
+        );
+    }
+////////////////////////////////////////////////////////////////////////
+
     return interpolate
     (
         sf,

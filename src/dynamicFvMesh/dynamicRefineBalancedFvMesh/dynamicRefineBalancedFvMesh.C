@@ -724,7 +724,7 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                     coarsePoints[localIndex[cellI]] += C()[cellI]/w;
                 }
             
-                //Set up decomposer - a separate dictionary is used here so
+                // Set up decomposer - a separate dictionary is used here so
                 // you can use a simple partitioning for decomposePar and
                 // ptscotch for the rebalancing (or any chosen algorithms)
                 autoPtr<decompositionMethod> decomposer
