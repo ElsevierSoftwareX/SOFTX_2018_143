@@ -14,7 +14,7 @@ runApplication subsetMesh -overwrite c0 -patch walls
 for count in {1..5}
 do
     runApplication setFields
-    execRefinement -overwrite -scalarFields '(alpha.water)'
+    meshUpdater -overwrite
 done
 
 runApplication setFields
