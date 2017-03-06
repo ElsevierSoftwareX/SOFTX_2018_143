@@ -5,22 +5,21 @@ cd ${0%/*} || exit 1
 
 
 cd src/dynamicMesh/
-wmake libso
+wclean
 cd -
 
 cd src/dynamicFvMesh/
-wmake libso
+wclean
+cd -
+
+cd applications/utilities/meshUpdaterOrig/
+wclean
 cd -
 
 cd applications/utilities/meshUpdater/
-wmake
-cd - 
-
-# linked vs the original OF dynamicMesh libraries 
-cd applications/utilities/meshUpdaterOrig/
-wmake
-cd - 
+wclean
+cd -
 
 cd applications/utilities/initSurfaceFields/
-wmake
+wclean
 cd - 
