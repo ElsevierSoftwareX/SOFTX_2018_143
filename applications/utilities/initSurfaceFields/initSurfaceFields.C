@@ -23,11 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    execRefinement
+    initSurfaceFields
 
 Description
-    executes mesh.update() based on constant/dynamicMeshDict
-    user has to specify the fields needed for specified refinement criteria in above file
+    Initializes surfaceFields to test mapping based on face centre position vector
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,21 +58,6 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
 
-/*
-    volVectorField myVolField
-    (
-        IOobject
-        (
-            "myVolField",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedVector("myVolField", dimLength, vector(0,0,0))
-    );
-*/
     surfaceScalarField mySurfaceScalarField
     (
         IOobject
@@ -115,8 +99,6 @@ int main(int argc, char *argv[])
         )
     );
 
-
-//    myVolField = mesh.C();
     mySurfaceScalarField = mag(mesh.Cf());
     mySurfaceVectorField = mesh.Cf();
     runTime.writeNow();
