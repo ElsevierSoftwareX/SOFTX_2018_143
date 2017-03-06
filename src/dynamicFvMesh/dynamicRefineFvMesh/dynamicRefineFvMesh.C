@@ -205,6 +205,20 @@ void Foam::dynamicRefineFvMesh::readDict()
         correctFluxes_.insert(fluxVelocities[i][0], fluxVelocities[i][1]);
     }
 
+    if (refineDict.found("mapSurfaceFields"))
+    {
+        List<word> surfFlds = List<word>
+        (
+            refineDict.lookup("mapSurfaceFields")
+        );
+        // Rework into hashtable.
+        correctFluxes_.resize(surfFlds.size());
+        forAll(surfFlds, i)
+        {
+            mapSurfaceFields_.insert(surfFlds[i], surfFlds[i]);
+        };
+    }
+
     dumpLevel_ = Switch(refineDict.lookup("dumpLevel"));
 }
 
@@ -1015,8 +1029,12 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
 
         GeoField& sFld = *iter();
         if (mapSurfaceFields_.found(iter.key()))
-        {
-
+        {   
+            if (debug)
+            {
+                Info << "dynamicRefineFvMesh::mapNewInternalFaces(): " <<iter.key()<< endl;
+            }
+            
             Field<T> tsFld(this->nFaces(), pTraits<T>::zero);
             forAll(sFld.internalField(), iFace)
             {
@@ -1121,7 +1139,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 {
     // Read static part of dictionary
     readDict();
-
+Info << "MY dynamic Refine FV Mesh:-------------------------------------------- " << endl;
 
     const labelList& cellLevel = meshCutter_.cellLevel();
     const labelList& pointLevel = meshCutter_.pointLevel();
