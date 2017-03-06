@@ -6,4 +6,4 @@ dynamicInkJetFvMesh/dynamicInkJetFvMesh.C
 dynamicRefineFvMesh/dynamicRefineFvMesh.C
 dynamicMotionSolverListFvMesh/dynamicMotionSolverListFvMesh.C
 
-LIB = $(FOAM_LIBBIN)/libdynamicFvMesh
+LIB = $(FOAM_USER_LIBBIN)/libdynamicFvMeshAMR

@@ -134,4 +134,4 @@ polyMeshFilter/polyMeshFilter.C
 pointPatchDist/externalPointEdgePoint.C
 pointPatchDist/pointPatchDist.C
 
-LIB = $(FOAM_LIBBIN)/libdynamicMesh
+LIB = $(FOAM_USER_LIBBIN)/libdynamicMeshAMR
