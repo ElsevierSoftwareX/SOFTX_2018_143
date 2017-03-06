@@ -8,7 +8,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lfiniteVolume \
-    $(FOAM_USER_LIBBIN)/libdynamicMeshAMR.so \
+    $(FOAM_USER_LIBBIN)/libdynamicMesh.so \
     -lmeshTools \
-    $(FOAM_USER_LIBBIN)/libdynamicFvMeshAMR.so
+    $(FOAM_USER_LIBBIN)/libdynamicFvMesh.so
 
