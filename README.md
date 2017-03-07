@@ -42,8 +42,10 @@ A domain with two cells is initialized using the utility `initSurfaceFields`. Ca
 
 ###### unitTest_LoadBalancingSurfaceFieldFlip
 A domain with three cells is decomposed manually. processor0 with one and processor1 with two cells. The cell at processor0 gets refined which leads to an imbalance higher than the minimal threshold for load balancing. **During the rebalancing step all surfaceFields get mapped using the flipping mechanism** as it is only correct for fluxes. Signs of the surfaceFields are falsly changed at processor patches if they don't represent a flux.
+Code changes are were necessary in [`fvMeshDistribute/fvMeshDistributeTemplates.C`](https://bitbucket.org/drettenmaier/amrandloadbalancing/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-src/dynamicMesh/fvMeshDistribute/fvMeshDistributeTemplates.C), [`fvMeshSubset/fvMeshSubsetInterpolate.C`](https://bitbucket.org/drettenmaier/amrandloadbalancing/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-src/dynamicMesh/fvMeshSubset/fvMeshSubsetInterpolate.C) and [`src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H`](https://bitbucket.org/drettenmaier/amrandloadbalancing/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-dontFlipSurfaceVectorFields.patch)
+In some cases we still observe a flipping of `surfaceVectorFields` using the `decomposePar` method.
 
 ###### damBreakAMR_LB
+The damBreak case is set up with an adaptive mesh refinement and load balancing. `interDyMFoam` recalculates the flux `phi` after a mesh.update() call using the surfaceVectorField `Uf`,where in earlier versions of OF `fvc::interpolate(U)` was used. Without the appropriate mapping of new internal faces and the careful handling of the face flipping operator AMR+LB simulations only run through with some luck.
 
-### Code ###
 ### Code ###
