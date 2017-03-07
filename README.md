@@ -21,17 +21,18 @@
 * Daniel Deising: deising@mma.tu-darmstadt.de
 
 ***
-### utilities ###
-###### meshUpdater
+### Utilities ###
+##### meshUpdater
 Updates the mesh calling `mesh.update()`. Depending on the selected mesh type in `dynamicMeshDict`, an adaptive mesh refinement and a load balancing step is performed.
 Thereby all volume and surface fields are mapped onto the new mesh or processor distribution. 
 
 An overwrite option is provided using `-overwrite`
 
-###### initSurfaceFields
+##### initSurfaceFields
 Initializes a `surfaceScalarField mySurfaceScalarField;` and a `surfaceVectorField mySurfaceVectorField;` which are initialized with the distance to the domain origin.
 
 
 ### Test Cases ###
+
 
 ### Code ###
