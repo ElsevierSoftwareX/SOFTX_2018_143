@@ -46,6 +46,6 @@ Code changes are were necessary in [`fvMeshDistribute/fvMeshDistributeTemplates.
 In some cases we still observe a flipping of `surfaceVectorFields` using the `decomposePar` method.
 
 ###### damBreakAMR_LB
-The damBreak case is set up with an adaptive mesh refinement and load balancing. `interDyMFoam` recalculates the flux `phi` after a mesh.update() call using the surfaceVectorField `Uf`,where in earlier versions of OF `fvc::interpolate(U)` was used. Without the appropriate mapping of new internal faces and the careful handling of the face flipping operator AMR+LB simulations only run through with some luck.
+The damBreak case is set up with an adaptive mesh refinement and load balancing. `interDyMFoam` recalculates the flux `phi` after a mesh.update() call using the surfaceVectorField `Uf`, where in earlier versions of OF `fvc::interpolate(U)` was used. Without the appropriate mapping of new internal faces and the careful handling of the face flipping operator AMR+LB simulations only run through with some luck.
 
 ### Code ###
