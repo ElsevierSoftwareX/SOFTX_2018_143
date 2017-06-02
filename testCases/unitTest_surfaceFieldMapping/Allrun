@@ -29,6 +29,7 @@ cleanCase()
 	    rm -rf level0Edge*
 	    rm -rf refinementHistory*
 	    rm -rf surfaceIndex.gz*
+	    cd $CASEDIR
 	fi
 
 	# remove Processors

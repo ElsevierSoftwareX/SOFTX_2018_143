@@ -1034,7 +1034,7 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
             {
                 Info << "dynamicRefineFvMesh::mapNewInternalFaces(): " <<iter.key()<< endl;
             }
-            
+
             Field<T> tsFld(this->nFaces(), pTraits<T>::zero);
             forAll(sFld.internalField(), iFace)
             {
@@ -1139,7 +1139,6 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 {
     // Read static part of dictionary
     readDict();
-Info << "MY dynamic Refine FV Mesh:-------------------------------------------- " << endl;
 
     const labelList& cellLevel = meshCutter_.cellLevel();
     const labelList& pointLevel = meshCutter_.pointLevel();
