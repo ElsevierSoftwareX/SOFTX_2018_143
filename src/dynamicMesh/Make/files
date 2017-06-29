@@ -44,6 +44,14 @@ $(hexRef8)/hexRef8.C
 $(hexRef8)/hexRef8Data.C
 $(hexRef8)/refinementHistory.C
 
+hexRef4 = polyTopoChange/polyTopoChange/hexRef4
+
+$(hexRef4)/hexRef4.C
+
+hexRefAxi = polyTopoChange/polyTopoChange/hexRefAxi
+
+$(hexRefAxi)/hexRefAxi.C
+
 slidingInterface/slidingInterface.C
 slidingInterface/slidingInterfaceProjectPoints.C
 slidingInterface/coupleSlidingInterface.C
