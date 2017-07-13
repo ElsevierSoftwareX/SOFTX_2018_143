@@ -110,17 +110,17 @@ class hexRef4
         //- Get patch and zone info
         void getFaceInfo
         (
-            const label faceI,
+            const label facei,
             label& patchID,
             label& zoneID,
             label& zoneFlip
         ) const;
 
-        //- Adds a face on top of existing faceI. Reverses if necessary.
+        //- Adds a face on top of existing facei. Reverses if necessary.
         label addFace
         (
             polyTopoChange& meshMod,
-            const label faceI,
+            const label facei,
             const face& newFace,
             const label own,
             const label nei
@@ -137,12 +137,12 @@ class hexRef4
             const label nei
         ) const;
 
-        //- Modifies existing faceI for either new owner/neighbour or new face
+        //- Modifies existing facei for either new owner/neighbour or new face
         //  points. Reverses if necessary.
         void modFace
         (
             polyTopoChange& meshMod,
-            const label faceI,
+            const label facei,
             const face& newFace,
             const label own,
             const label nei
@@ -150,24 +150,24 @@ class hexRef4
 
         scalar getLevel0EdgeLength() const;
 
-        //- Get cell added to point of cellI (if any)
+        //- Get cell added to point of celli (if any)
         label getAnchorCell
         (
             const labelListList& cellAnchorPoints,
             const labelListList& cellAddedCells,
-            const label cellI,
-            const label faceI,
-            const label pointI
+            const label celli,
+            const label facei,
+            const label pointi
         ) const;
 
-        //- Get new owner and neighbour (in unspecified order) of pointI
-        //  on faceI.
+        //- Get new owner and neighbour (in unspecified order) of pointi
+        //  on facei.
         void getFaceNeighbours
         (
             const labelListList& cellAnchorPoints,
             const labelListList& cellAddedCells,
-            const label faceI,
-            const label pointI,
+            const label facei,
+            const label pointi,
 
             label& own,
             label& nei
@@ -181,7 +181,7 @@ class hexRef4
         //- Count number of vertices <= anchorLevel
         label countAnchors(const labelList&, const label) const;
         //- Debugging: dump cell as .obj file
-        void dumpCell(const label cellI) const;
+        void dumpCell(const label celli) const;
         //- Find index of point with wantedLevel, starting from fp.
         label findLevel
         (
@@ -198,8 +198,8 @@ class hexRef4
         static void checkInternalOrientation
         (
             polyTopoChange& meshMod,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             const point& ownPt,
             const point& neiPt,
             const face& newFace
@@ -209,8 +209,8 @@ class hexRef4
         static void checkBoundaryOrientation
         (
             polyTopoChange& meshMod,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             const point& ownPt,
             const point& boundaryPt,
             const face& newFace
@@ -234,8 +234,8 @@ class hexRef4
             const labelList& cellMidPoint,
             const labelList& faceMidPoint,
             const labelList& edgeMidPoint,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             const bool faceOrder,
             const label midPointI,
             const label anchorPointI,
@@ -253,15 +253,15 @@ class hexRef4
             const labelList& cellMidPoint,
             const labelList& faceMidPoint,
             const labelList& edgeMidPoint,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
 
             Map<edge>& midPointToAnchors,
             polyTopoChange& meshMod,
             label& nFacesAdded
         ) const;
 
-        //- Create all internal faces to split cellI into 8.
+        //- Create all internal faces to split celli into 8.
         void createInternalFaces
         (
             const labelListList& cellAnchorPoints,
@@ -270,7 +270,7 @@ class hexRef4
             const labelList& faceMidPoint,
             const labelList& faceAnchorLevel,
             const labelList& edgeMidPoint,
-            const label cellI,
+            const label celli,
             polyTopoChange& meshMod
         ) const;
 
@@ -280,7 +280,7 @@ class hexRef4
         (
             const labelList& edgeMidPoint,
             const label cLevel,
-            const label faceI,
+            const label facei,
             const label startFp,
             DynamicList<label>& faceVerts
         ) const;
@@ -290,7 +290,7 @@ class hexRef4
         (
             const labelList& edgeMidPoint,
             const label cLevel,
-            const label faceI,
+            const label facei,
             const label startFp,
             DynamicList<label>& faceVerts
         ) const;
@@ -383,7 +383,7 @@ public:
         // Refinement
 
             //- Gets level such that the face has four points <= level.
-            label getAnchorLevel(const label faceI) const;
+            label getAnchorLevel(const label facei) const;
 
             //- Given valid mesh and current cell level and proposed
             //  cells to refine calculate any clashes (due to 2:1) and return
@@ -392,7 +392,7 @@ public:
             //  removes cells to refine (maxSet = false)
 
             //- Helper:get points of a cell without using cellPoints addressing
-            labelList cellPoints(const label cellI) const;
+            labelList cellPoints(const label celli) const;
 
             //- Given valid mesh and current cell level and proposed
             //  cells to refine calculate any clashes (due to 2:1) and return
