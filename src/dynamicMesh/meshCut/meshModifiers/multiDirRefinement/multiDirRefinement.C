@@ -32,7 +32,7 @@ License
 #include "geomCellLooper.H"
 #include "topoSet.H"
 #include "directions.H"
-#include "hexRef8.H"
+#include "hexRef.H"
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
 #include "ListOps.H"
@@ -238,34 +238,37 @@ void Foam::multiDirRefinement::refineHex8
             << endl;
     }
 
-    hexRef8 hexRefiner
+    autoPtr<hexRef> hexRefiner
     (
-        mesh,
-        labelList(mesh.nCells(), 0),    // cellLevel
-        labelList(mesh.nPoints(), 0),   // pointLevel
-        refinementHistory
+        hexRef::New
         (
-            IOobject
+            mesh,
+            labelList(mesh.nCells(), 0),    // cellLevel
+            labelList(mesh.nPoints(), 0),   // pointLevel
+            refinementHistory
             (
-                "refinementHistory",
-                mesh.facesInstance(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
+                IOobject
+                (
+                    "refinementHistory",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                List<refinementHistory::splitCell8>(0),
+                labelList(0),
                 false
-            ),
-            List<refinementHistory::splitCell8>(0),
-            labelList(0),
-            false
-        )                                   // refinement history
+            )                                   // refinement history
+        )
     );
 
     polyTopoChange meshMod(mesh);
 
     labelList consistentCells
     (
-        hexRefiner.consistentRefinement
+        hexRefiner->consistentRefinement
         (
             hexCells,
             true                  // buffer layer
@@ -315,7 +318,7 @@ void Foam::multiDirRefinement::refineHex8
     }
 
 
-    hexRefiner.setRefinement(consistentCells, meshMod);
+    hexRefiner->setRefinement(consistentCells, meshMod);
 
     // Change mesh, no inflation
     autoPtr<mapPolyMesh> morphMapPtr = meshMod.changeMesh(mesh, false, true);
@@ -337,7 +340,7 @@ void Foam::multiDirRefinement::refineHex8
             << mesh.time().timeName() << endl;
     }
 
-    hexRefiner.updateMesh(morphMap);
+    hexRefiner->updateMesh(morphMap);
 
     // Collect all cells originating from same old cell (original + 7 extra)
 
