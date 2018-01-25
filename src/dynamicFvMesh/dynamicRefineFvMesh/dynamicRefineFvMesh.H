@@ -98,7 +98,7 @@ class dynamicRefineFvMesh
 protected:
 
         //- Mesh cutting engine
-        hexRef8 meshCutter_;
+        autoPtr<hexRef> meshCutter_;
 
         //- Dump cellLevel for postprocessing
         Switch dumpLevel_;
@@ -230,7 +230,7 @@ public:
     // Member Functions
 
         //- Direct access to the refinement engine
-        const hexRef8& meshCutter() const
+        const autoPtr<hexRef> meshCutter() const
         {
             return meshCutter_;
         }

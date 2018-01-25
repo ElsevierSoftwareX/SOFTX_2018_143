@@ -38,19 +38,15 @@ polyTopoChange/polyTopoChange/duplicatePoints.C
 polyTopoChange/polyTopoChange/tetDecomposer.C
 
 
-hexRef8 = polyTopoChange/polyTopoChange/hexRef8
+hexRef = polyTopoChange/polyTopoChange/hexRef
 
-$(hexRef8)/hexRef8.C
-$(hexRef8)/hexRef8Data.C
-$(hexRef8)/refinementHistory.C
+$(hexRef)/hexRef.C
+$(hexRef)/hexRefData.C
+$(hexRef)/refinementHistory.C
 
-hexRef4 = polyTopoChange/polyTopoChange/hexRef4
-
-$(hexRef4)/hexRef4.C
-
-hexRefAxi = polyTopoChange/polyTopoChange/hexRefAxi
-
-$(hexRefAxi)/hexRefAxi.C
+$(hexRef)/hexRef8/hexRef8.C
+$(hexRef)/hexRef4/hexRef4.C
+$(hexRef)/hexRef4Axi/hexRef4Axi.C
 
 slidingInterface/slidingInterface.C
 slidingInterface/slidingInterfaceProjectPoints.C
