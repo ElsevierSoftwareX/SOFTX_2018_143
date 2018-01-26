@@ -47,7 +47,7 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 Foam::label Foam::dynamicRefineBalancedFvMesh::topParentID(label p)
 {
-    label nextP = meshCutter().history().splitCells()[p].parent_;
+    label nextP = meshCutter()->history().splitCells()[p].parent_;
     if( nextP < 0 )
     {
         return p;
@@ -84,36 +84,37 @@ Foam::List<Foam::scalar> Foam::dynamicRefineBalancedFvMesh::readRefinementPoints
     refData[3] = readScalar(refineDict.lookup("maxRefinement"));
         
     return refData;
+
 }
 
 void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
 {
     Info<< "Calculating internal refinement field" << endl;
-    
+
     volScalarField& intRefFld = *internalRefinementFieldPtr_;
     volScalarField& targetFld = *targetLevelPtr_;
     volScalarField& currFld = *isLevelPtr_;
-    
+
     // Set the internal refinement field to zero to start with
     intRefFld = dimensionedScalar("zero",dimless,0.0);
-    
+
     // Get the cell level field from dynamicRefineFvMesh
-    const labelList& cellLevel = meshCutter().cellLevel();
-    
+    const labelList& cellLevel = meshCutter()->cellLevel();
+
     // Read the points at which refinement and unrefinement occur from the
     // dynamicMeshDict entries
     List<scalar> refinePoints = readRefinementPoints();
-    
+
     // init list for refine/unrefine field (-1=unrefine, 1=refine, 0=do nothing)
     labelList markRefineCells (this->nCells(), 0);
-    
+
     // init list for target refinement level per cell
     labelList targetLevel (this->nCells(), 0);
-    
+
     // First fields
     List<word> fieldNames = fields_.toc();
     Field<scalar> refFld(nCells(),0.0);
-    
+
     forAll(fieldNames, i)
     {
         word fldName = fieldNames[i];
@@ -129,7 +130,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
         {
             if ((fld[cellI] >= minValue) && (fld[cellI] <= maxValue))
             {
-                // increase targetLevel up to refineLevel 
+                // increase targetLevel up to refineLevel
                 // BUT: do not decrease if cell already marked for higher refinement level by previous criterion
                 targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
             }
@@ -153,10 +154,10 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
         if (nAddLayers > 0)
         {
             //- create a volField of the labelList targetLevel
-            volScalarField tLevel(intRefFld * 0.0);  
+            volScalarField tLevel(intRefFld * 0.0);
             forAll(targetLevel, cellI)
             {
-                tLevel[cellI] = targetLevel[cellI];         
+                tLevel[cellI] = targetLevel[cellI];
             }
 
             // #nAddLayers cells per additional level
@@ -164,35 +165,35 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
             {
                 //- select the area with targetLevel==refineLevel
                 volScalarField finest = pos(tLevel - refineLevel + SMALL);
-                
-                //- add +1 to targetLevel on the enlarged stencil 
+
+                //- add +1 to targetLevel on the enlarged stencil
                 tLevel += pos( fvc::average(fvc::interpolate(finest) - SMALL)) - finest;
             }
 
             //- copy the new results onto the target labelList
             forAll(targetLevel, cellI)
             {
-                targetLevel[cellI] = tLevel[cellI];         
+                targetLevel[cellI] = tLevel[cellI];
             }
         }
     }
-    
+
     // Then gradients
     List<word> gradFieldNames = gradFields_.toc();
-    
+
     Field<scalar> cubeRtV = Foam::pow(this->V(),1.0/3.0);
-    
+
     forAll(gradFieldNames, i)
     {
         word fldName = gradFieldNames[i];
         scalar minValue = gradFields_[fldName][0];
         scalar maxValue = gradFields_[fldName][1];
         label refineLevel = static_cast<label>(gradFields_[fldName][2]);
-        
+
         const volScalarField& fld = this->lookupObject<volScalarField>(fldName);
 
         refFld = mag(fvc::grad(fld)) * cubeRtV;
-        
+
         // Limit the value of refFld based on its max level
         forAll(refFld, cellI)
         {
@@ -202,22 +203,22 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
             }
         }
     }
-    
+
     // Then curls
     List<word> curlFieldNames = curlFields_.toc();
-    
-    
+
+
     forAll(curlFieldNames, i)
     {
         word fldName = curlFieldNames[i];
         scalar minValue = curlFields_[fldName][0];
         scalar maxValue = curlFields_[fldName][1];
         label refineLevel = static_cast<label>(curlFields_[fldName][2]);
-        
+
         const volVectorField& fld = this->lookupObject<volVectorField>(fldName);
-        
+
         refFld = mag(fvc::curl(fld));
-        
+
         // Limit the value of refFld based on its max level
         forAll(refFld, cellI)
         {
@@ -227,26 +228,25 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
             }
         }
     }
-    
+
     // At the interface, assumed to be always the maximum refinement level
     List<word> interfaceRefineField = interface_.toc();
     forAll(interfaceRefineField, i)
     {
         word fldName = interfaceRefineField[i];
-        // read region of maximum refinement levels inside and outside of interface indicator field 
+        // read region of maximum refinement levels inside and outside of interface indicator field
         // (does not need to be alpha, can also be a concentration field)
-        
+
         scalar innerRefLayers = readScalar(interface_[fldName].lookup("innerRefLayers"));
         scalar outerRefLayers = readScalar(interface_[fldName].lookup("outerRefLayers"));
-        
+
         scalar nAddLayers(0);
         if (interface_[fldName].found("nAddLayers"))
         {
             nAddLayers = readScalar(interface_[fldName].lookup("nAddLayers"));
         }
-        
         label refineLevel = refinePoints[3];
-        
+
         if (interface_[fldName].found("maxRefineLevel"))
         {
             refineLevel = readScalar(interface_[fldName].lookup("maxRefineLevel"));
@@ -254,17 +254,17 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
             // to avoid user input mistakes, limit the value with the maximum allowed
             refineLevel = min(refinePoints[3], refineLevel);
         }
-        
+
         const volScalarField& fld = this->lookupObject<volScalarField>(fldName);
-        
+
         volScalarField isInterface(intRefFld * 0.0);
         isInterface = dimensionedScalar("isInterface",dimless,0.0);
-        
+
         surfaceScalarField deltaAlpha = mag(fvc::snGrad(fld) / this->deltaCoeffs());
-        
+
         const unallocLabelList& owner = this->owner();
         const unallocLabelList& neighbour = this->neighbour();
-        
+
         forAll(deltaAlpha, faceI)
         {
         //TODO: add a min max value of the specified field to be marked for refinement
@@ -273,22 +273,22 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
             {
                 label own = owner[faceI];
                 label nei = neighbour[faceI];
-                
+
                 // set isInterface field to one
                 isInterface[own] = 1.0;
                 isInterface[nei] = 1.0;
             }
         }
-        
+
         // assumed fld=0.5*(fldMax+fldMin) defines the interface
         dimensionedScalar fldInterfaceValue(0.5*(max(fld)+min(fld)));
-        
+
         //-DD: old implementation based on face interpolation
         //     which results in slower transport in diagonal direction
         // add inner refinement layers
         //for(label i=0; i < innerRefLayers; i++)
         //{
-        //    isInterface += neg(- fvc::average(fvc::interpolate(isInterface)) * pos(fld - fldInterfaceValue)); 
+        //    isInterface += neg(- fvc::average(fvc::interpolate(isInterface)) * pos(fld - fldInterfaceValue));
         //    isInterface = neg(- isInterface);
         //}
         //
@@ -310,7 +310,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
         //-DD: new version using volPointInterpolation (direction independent buffer layer)
         const volPointInterpolation& pInterp = volPointInterpolation::New(*this);
         const fvMesh& mesh = fld.mesh();
-     
+
         // add inner refinement layers
         for(label i=0; i < innerRefLayers; i++)
         {
@@ -368,7 +368,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
                 targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
             }
         }
-        
+
         //-DD: old implementation based on face interpolation
         //     which results in slower transport in diagonal direction
         // expand additional layers if specified:
@@ -383,7 +383,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
                    isInterface += neg(- fvc::average(fvc::interpolate(isInterface)));
                    isInterface = neg(- isInterface);
                }
-               
+
                forAll(isInterface, cellI)
                {
                    if (isInterface[cellI] == 1.0)
@@ -394,45 +394,45 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
            }
         }
     }
-    
+
     // The set refinement physical regions (force the mesh to stay refined
     // near key features)
     forAll(refinedRegions_, regionI)
     {
         const entry& region = refinedRegions_[regionI];
-        
-        autoPtr<topoSetSource> source = 
+
+        autoPtr<topoSetSource> source =
             topoSetSource::New(region.keyword(), *this, region.dict());
-        
+
         cellSet selectedCellSet
         (
             *this,
             "cellSet",
             nCells()/10+1 //estimate
         );
-        
+
         source->applyToSet
         (
             topoSetSource::NEW,
             selectedCellSet
         );
-        
+
         const labelList cells = selectedCellSet.toc();
-        
+
         label minLevel = readLabel(region.dict().lookup("minLevel"));
-        
+
         forAll(cells, i)
         {
             const label& cellI = cells[i];
-            
+
             targetLevel[cellI] = max(targetLevel[cellI], minLevel);
         }
     }
-    
+
     //-DD: add buffer layer based on targetLevel field to prevent 2-to-1 refinement
-    
+
     volScalarField blockedLevel = targetFld * 0.;
-    
+
     for (label currLayer=refinePoints[3]; currLayer>=1; currLayer--)
     {
         forAll (targetLevel, cellI)
@@ -442,7 +442,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
                 blockedLevel[cellI] = targetLevel[cellI];
             }
         }
-        
+
         for (label i=0; i<nBufferLayers_; i++)
         {
             blockedLevel = max(blockedLevel, pos(fvc::average(fvc::interpolate(blockedLevel)) - SMALL)*(currLayer-1));
@@ -455,7 +455,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
         }
         targetLevel = max(targetLevel, blockLev);
     }
-    
+
     // mark cells to be refined/unrefined based on above criteria:
     // simply check, if targetLevel lower or higher cellLevel
     forAll (intRefFld.internalField(), cellI)
@@ -466,7 +466,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
     }
 
     intRefFld.correctBoundaryConditions();
-    
+
     Info<<"Min,max refinement field = " << Foam::min(intRefFld).value() << ", "
         << Foam::max(intRefFld).value() << endl;
 }
@@ -490,21 +490,21 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
     );
 
     nBufferLayers_ = readLabel(dynamicMeshDict.subDict("dynamicRefineFvMeshCoeffs").lookup("nBufferLayers"));
-    
+
     if( dynamicMeshDict.isDict("refinementControls") )
     {
-        dictionary refineControlDict = 
+        dictionary refineControlDict =
             dynamicMeshDict.subDict("refinementControls");
-        
-        enableRefinementControl_ = 
+
+        enableRefinementControl_ =
             Switch(refineControlDict.lookup("enableRefinementControl"));
-        
+
         if( enableRefinementControl_ )
         {
             // Overwrite field name entry in dynamicRefineFvMeshCoeffs?
-            // For now you just have to be smart and enter 
+            // For now you just have to be smart and enter
             // 'internalRefinementField' for the field name manually
-            
+
             // Read HashTable of field-refinement scalars
             if( refineControlDict.found("fields") )
             {
@@ -513,7 +513,7 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
                     refineControlDict.lookup("fields")
                 );
             }
-            
+
             // Read HashTable of gradient-refinement scalars
             if( refineControlDict.found("gradients") )
             {
@@ -522,7 +522,7 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
                     refineControlDict.lookup("gradients")
                 );
             }
-            
+
             // Read HashTable of curl-refinement vectors
             if( refineControlDict.found("curls") )
             {
@@ -531,7 +531,7 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
                     refineControlDict.lookup("curls")
                 );
             }
-            
+
             // Read interface refinement data
             if( refineControlDict.found("interface") )
             {
@@ -540,7 +540,7 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
                     refineControlDict.lookup("interface")
                 );
             }
-            
+
             // Read refinement regions
             if( refineControlDict.found("regions") )
             {
@@ -554,7 +554,7 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-            
+
 Foam::dynamicRefineBalancedFvMesh::dynamicRefineBalancedFvMesh
 (
     const IOobject& io
@@ -574,7 +574,7 @@ Foam::dynamicRefineBalancedFvMesh::dynamicRefineBalancedFvMesh
     rebalance_(false)
 {
     readRefinementDict();
-    
+
     if( enableRefinementControl_ )
     {
         internalRefinementFieldPtr_ = new volScalarField
@@ -636,10 +636,10 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
 {
     //Part 0 - Update internally calculated refinement field
     readRefinementDict();
-    
+
     List<scalar> refinePoints = readRefinementPoints();
     label refineInterval = refinePoints[2];
-    
+
     if( enableRefinementControl_ && time().timeIndex() > 0 && time().timeIndex() % refineInterval == 0 )
     {
         updateRefinementField();
@@ -655,7 +655,7 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
         correctBoundaries<vector>();
         correctBoundaries<sphericalTensor>();
         correctBoundaries<symmTensor>();
-        correctBoundaries<tensor>();      
+        correctBoundaries<tensor>();
     }
 
     dictionary decomposeParDict
@@ -693,14 +693,14 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                 )
             ).subDict("dynamicRefineFvMeshCoeffs")
         );
-    
+
         Switch enableBalancing = refineDict.lookup("enableBalancing");
-    
+
         if ( Pstream::parRun() && hasChanged )
         {
-            const scalar allowableImbalance = 
+            const scalar allowableImbalance =
                 readScalar(refineDict.lookup("allowableImbalance"));
-            
+
             //First determine current level of imbalance - do this for all
             // parallel runs with a changing mesh, even if balancing is disabled
             label nGlobalCells = globalData().nTotalCells();
@@ -708,9 +708,9 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
             scalar localImbalance = mag(scalar(nCells()) - idealNCells);
             Foam::reduce(localImbalance, maxOp<scalar>());
             scalar maxImbalance = localImbalance/idealNCells;
-        
+
             Info<<"Maximum imbalance = " << 100*maxImbalance << " %" << endl;
-        
+
             //If imbalanced, construct weighted coarse graph (level 0) with node
             // weights equal to their number of subcells. This partitioning works
             // as long as the number of level 0 cells is several times greater than
@@ -718,13 +718,13 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
             if( maxImbalance > allowableImbalance && enableBalancing)
             {
                 Info << "\n**Solver hold for redistribution at time = "  << time().timeName() << " s" << endl;
-                
-                rebalance_ = true;   
 
-                const labelIOList& cellLevel = meshCutter().cellLevel();
+                rebalance_ = true;
+
+                const labelIOList& cellLevel = meshCutter()->cellLevel();
                 Map<label> coarseIDmap(100);
                 labelList uniqueIndex(nCells(),0);
-            
+
                 label nCoarse = 0;
 
                 forAll(cells(), cellI)
@@ -733,35 +733,35 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                     {
                         uniqueIndex[cellI] = nCells() + topParentID
                         (
-                            meshCutter().history().parentIndex(cellI)
+                            meshCutter()->history().parentIndex(cellI)
                         );
                     }
                     else
                     {
                         uniqueIndex[cellI] = cellI;
                     }
-                
+
                     if( coarseIDmap.insert(uniqueIndex[cellI], nCoarse) )
                     {
                         ++nCoarse;
                     }
                 }
-            
+
                 // Convert to local sequential indexing and calculate coarse
                 // points and weights
                 labelList localIndex(nCells(),0);
                 pointField coarsePoints(nCoarse,vector::zero);
                 scalarField coarseWeights(nCoarse,0.0);
-            
+
                 forAll(uniqueIndex, cellI)
                 {
                     localIndex[cellI] = coarseIDmap[uniqueIndex[cellI]];
-                
+
                     // If 2D refinement (quadtree) is ever implemented, this '3'
                     // should be set in general as the number of refinement
                     // dimensions.
                     label w = (1 << (3*cellLevel[cellI]));
-                
+
                     coarseWeights[localIndex[cellI]] += 1.0;
                     coarsePoints[localIndex[cellI]] += C()[cellI]/w;
                 }
@@ -786,26 +786,26 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                         )
                     )
                 );
-            
+
                 labelList finalDecomp = decomposer().decompose
                 (
-                    *this, 
+                    *this,
                     localIndex,
                     coarsePoints,
                     coarseWeights
                 );
 
                 scalar tolDim = globalMeshData::matchTol_ * bounds().mag();
-            
+
                 Info<< "Distributing the mesh ..." << endl;
                 fvMeshDistribute distributor(*this, tolDim);
-            
+
                 Info<< "Mapping the fields ..." << endl;
                 autoPtr<mapDistributePolyMesh> map =
                     distributor.distribute(finalDecomp);
-                  
+
                 Info<< "Distribute the map ..." << endl;
-                meshCutter_.distribute(map);
+                meshCutter_->distribute(map);
 
 
                 Info << "Successfully distributed mesh" << endl;
@@ -831,7 +831,7 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
         correctBoundaries<vector>();
         correctBoundaries<sphericalTensor>();
         correctBoundaries<symmTensor>();
-        correctBoundaries<tensor>();      
+        correctBoundaries<tensor>();
     }
 
     return hasChanged;

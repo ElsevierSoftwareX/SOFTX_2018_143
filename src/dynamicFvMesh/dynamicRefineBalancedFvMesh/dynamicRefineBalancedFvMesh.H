@@ -97,40 +97,40 @@ class dynamicRefineBalancedFvMesh
 :
     public dynamicRefineFvMesh
 {
-   
+
 private:
         //-
         volScalarField* internalRefinementFieldPtr_;
         volScalarField* targetLevelPtr_;
         volScalarField* isLevelPtr_;
-        
+
         //-
         HashTable< dictionary > fields_;
         
         //-
         HashTable< List<scalar> > gradFields_;
-        
+
         //-
         HashTable< List<scalar> > curlFields_;
-        
+
         //-
         HashTable< dictionary > interface_;
-        
+
         //-
-        PtrList<entry> refinedRegions_; 
-        
+        PtrList<entry> refinedRegions_;
+
         //-
         Switch enableRefinementControl_;
-        
+
         //-
         void updateRefinementField();
-        
+
         //-
         void readRefinementDict();
-        
+
         //-
         List<scalar> readRefinementPoints();
-        
+
         //- Disallow default bitwise copy construct
         dynamicRefineBalancedFvMesh(const dynamicRefineBalancedFvMesh&);
 
@@ -166,7 +166,7 @@ public:
 
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();
-        
+
         //- Template to update all volField boundaries
         template<class Type> void correctBoundaries();
 
