@@ -69,6 +69,19 @@ namespace Foam
 
 class hexRef8 : public hexRef
 {
+
+protected:
+
+        //- Get cell added to point of celli (if any)
+        label getAnchorCell
+        (
+            const labelListList& cellAnchorPoints,
+            const labelListList& cellAddedCells,
+            const label celli,
+            const label facei,
+            const label pointi
+        ) const;
+
         //- Store in maps correspondence from midpoint to anchors and faces.
         label storeMidPointInfo
         (

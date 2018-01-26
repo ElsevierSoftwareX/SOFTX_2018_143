@@ -230,7 +230,7 @@ public:
     // Member Functions
 
         //- Direct access to the refinement engine
-        const autoPtr<hexRef> meshCutter() const
+        const autoPtr<hexRef>& meshCutter() const
         {
             return meshCutter_;
         }
