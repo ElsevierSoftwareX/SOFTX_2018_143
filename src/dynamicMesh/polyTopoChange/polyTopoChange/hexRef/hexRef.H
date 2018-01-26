@@ -152,14 +152,14 @@ protected:
         scalar getLevel0EdgeLength() const;
 
         //- Get cell added to point of celli (if any)
-        label getAnchorCell
+        virtual label getAnchorCell
         (
             const labelListList& cellAnchorPoints,
             const labelListList& cellAddedCells,
             const label celli,
             const label facei,
             const label pointi
-        ) const;
+        ) const = 0;
 
         //- Get new owner and neighbour (in unspecified order) of pointi
         //  on facei.

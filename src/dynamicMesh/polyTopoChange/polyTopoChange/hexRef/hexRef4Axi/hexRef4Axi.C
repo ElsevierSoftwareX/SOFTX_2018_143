@@ -62,6 +62,79 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+// Check whether pointi is an anchor on celli.
+// If it is not check whether any other point on the face is an anchor cell.
+Foam::label Foam::hexRef4Axi::getAnchorCell
+(
+    const labelListList& cellAnchorPoints,
+    const labelListList& cellAddedCells,
+    const label celli,
+    const label facei,
+    const label pointi
+) const
+{
+    if (cellAnchorPoints[celli].size())
+    {
+        label index = findIndex(cellAnchorPoints[celli], pointi);
+
+        if (index != -1)
+        {
+            if (index >= 4) //AB....
+            {
+                if (index == 4)
+                {
+                    index = 8;
+                }
+                index = 8 - index;
+            } //AB
+            return cellAddedCells[celli][index];
+        }
+
+
+        // pointi is not an anchor cell.
+        // Maybe we are already a refined face so check all the face
+        // vertices.
+        const face& f = mesh_.faces()[facei];
+
+        forAll(f, fp)
+        {
+            label index = findIndex(cellAnchorPoints[celli], f[fp]);
+
+            if (index != -1)
+            {
+                if (index >= 4) //AB....
+                {
+                if (index == 4)
+                    {
+                        index = 8;
+                    }
+                    index = 8 - index;
+                } //AB
+                return cellAddedCells[celli][index];
+            }
+        }
+
+        // Problem.
+        dumpCell(celli);
+        Perr<< "cell:" << celli << " anchorPoints:" << cellAnchorPoints[celli]
+            << endl;
+
+        FatalErrorInFunction
+            << "Could not find point " << pointi
+            << " in the anchorPoints for cell " << celli << endl
+            << "Does your original mesh obey the 2:1 constraint and"
+            << " did you use consistentRefinement to make your cells to refine"
+            << " obey this constraint as well?"
+            << abort(FatalError);
+
+        return -1;
+    }
+    else
+    {
+        return celli;
+    }
+}
+
 // Internal faces are one per edge between anchor points. So one per midPoint
 // between the anchor points. Here we store the information on the midPoint
 // and if we have enough information:

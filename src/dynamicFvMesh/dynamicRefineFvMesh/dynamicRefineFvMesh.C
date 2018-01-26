@@ -203,7 +203,7 @@ void Foam::dynamicRefineFvMesh::readDict()
     forAll(fluxVelocities, i)
     {
         correctFluxes_.insert(fluxVelocities[i][0], fluxVelocities[i][1]);
-    }
+    };
 
     if (refineDict.found("mapSurfaceFields"))
     {
@@ -1504,7 +1504,6 @@ bool Foam::dynamicRefineFvMesh::update()
                 hasChanged = true;
             }
         }
-
 
         if ((nRefinementIterations_ % 10) == 0)
         {

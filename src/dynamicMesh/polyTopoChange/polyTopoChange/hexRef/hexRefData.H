@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hexRefData
+    Foam::hexRef8Data
 
 Description
     Various for reading/decomposing/reconstructing/distributing refinement
     data.
 
 SourceFiles
-    hexRefData.C
+    hexRef8Data.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hexRefData_H
-#define hexRefData_H
+#ifndef hexRef8Data_H
+#define hexRef8Data_H
 
 #include "labelIOList.H"
 #include "uniformDimensionedFields.H"
@@ -52,10 +52,10 @@ class refinementHistory;
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class hexRefData Declaration
+                           Class hexRef8Data Declaration
 \*---------------------------------------------------------------------------*/
 
-class hexRefData
+class hexRef8Data
 {
 
 private:
@@ -74,10 +74,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        hexRefData(const hexRefData&);
+        hexRef8Data(const hexRef8Data&);
 
         //- Disallow default bitwise assignment
-        void operator=(const hexRefData&);
+        void operator=(const hexRef8Data&);
 
 
 public:
@@ -86,29 +86,29 @@ public:
 
         //- Construct read. Has special provision for only some processors
         //  having the files so can be used in redistribution.
-        hexRefData(const IOobject& io);
+        hexRef8Data(const IOobject& io);
 
         //- Construct as subset
-        hexRefData
+        hexRef8Data
         (
             const IOobject& io,
-            const hexRefData&,
+            const hexRef8Data&,
             const labelList& cellMap,
             const labelList& pointMap
         );
 
-        //- Construct from multiple hexRefData
-        hexRefData
+        //- Construct from multiple hexRef8Data
+        hexRef8Data
         (
             const IOobject& io,
             const UPtrList<const labelList>& cellMaps,
             const UPtrList<const labelList>& pointMaps,
-            const UPtrList<const hexRefData>&
+            const UPtrList<const hexRef8Data>&
         );
 
 
     //- Destructor
-    ~hexRefData();
+    ~hexRef8Data();
 
 
     // Member Functions
@@ -124,6 +124,7 @@ public:
         bool write() const;
 };
 
+typedef hexRef8Data hexRefData;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

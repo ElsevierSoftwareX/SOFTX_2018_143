@@ -36,7 +36,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::hexRefData::hexRefData(const IOobject& io)
+Foam::hexRef8Data::hexRef8Data(const IOobject& io)
 {
     {
         IOobject rio(io);
@@ -81,10 +81,10 @@ Foam::hexRefData::hexRefData(const IOobject& io)
 }
 
 
-Foam::hexRefData::hexRefData
+Foam::hexRef8Data::hexRef8Data
 (
     const IOobject& io,
-    const hexRefData& data,
+    const hexRef8Data& data,
     const labelList& cellMap,
     const labelList& pointMap
 )
@@ -137,12 +137,12 @@ Foam::hexRefData::hexRefData
 }
 
 
-Foam::hexRefData::hexRefData
+Foam::hexRef8Data::hexRef8Data
 (
     const IOobject& io,
     const UPtrList<const labelList>& cellMaps,
     const UPtrList<const labelList>& pointMaps,
-    const UPtrList<const hexRefData>& procDatas
+    const UPtrList<const hexRef8Data>& procDatas
 )
 {
     const polyMesh& mesh = dynamic_cast<const polyMesh&>(io.db());
@@ -229,13 +229,13 @@ Foam::hexRefData::hexRefData
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::hexRefData::~hexRefData()
+Foam::hexRef8Data::~hexRef8Data()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::hexRefData::sync(const IOobject& io)
+void Foam::hexRef8Data::sync(const IOobject& io)
 {
     const polyMesh& mesh = dynamic_cast<const polyMesh&>(io.db());
 
@@ -293,7 +293,7 @@ void Foam::hexRefData::sync(const IOobject& io)
 }
 
 
-void Foam::hexRefData::distribute(const mapDistributePolyMesh& map)
+void Foam::hexRef8Data::distribute(const mapDistributePolyMesh& map)
 {
     if (cellLevelPtr_.valid())
     {
@@ -313,7 +313,7 @@ void Foam::hexRefData::distribute(const mapDistributePolyMesh& map)
 }
 
 
-bool Foam::hexRefData::write() const
+bool Foam::hexRef8Data::write() const
 {
     bool ok = true;
     if (cellLevelPtr_.valid())

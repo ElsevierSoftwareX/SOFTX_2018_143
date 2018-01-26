@@ -25,46 +25,50 @@ License
 
 #include "hexRef.H"
 
+#include "polyMesh.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::hexRef> Foam::hexRef::New
 (
     const polyMesh& mesh,
-    const bool readHistory = true
+    const bool readHistory
 )
 {
-    word hexRefType;
+    word hexRefTypeName;
 
     // Infer the type of hexRef we need to use from the number of dimensions in
     // the polymesh
-    // nSolutionsD == 3 && nGeometricD == 3: 3D mesh => hexRef8
-    // nSolutionsD == 3 && nGeometricD == 2: axisymmetric mesh => hexRefAxi
-    // nSolutionsD == 2 && nGeometricD == 2: 2D mesh => hexRef4
+    // nSolutionD == 3 && nGeometricD == 3: 3D mesh => hexRef8
+    // nSolutionD == 3 && nGeometricD == 2: axisymmetric mesh => hexRef4Axi
+    // nSolutionD == 2 && nGeometricD == 2: 2D mesh => hexRef4
 
-    label nSoluD(mesh.nSolutionsD());
+    label nSoluD(mesh.nSolutionD());
     label nGeomD(mesh.nGeometricD());
 
     if (nSoluD == 3 && nGeomD == 3)
     {
-        hexRefType = "hexRef";
+        hexRefTypeName = "hexRef8";
     }
     else if (nSoluD == 3 && nGeomD == 2)
     {
-        hexRefType = "hexRefAxi";
+        hexRefTypeName = "hexRef4Axi";
     }
     else if (nSoluD == 2 && nGeomD == 2)
     {
-        hexRefType = "hexRef4";
+        hexRefTypeName = "hexRef4";
     }
 
     meshConstructorTable::iterator hexRefIter =
-        meshConstructorTablePtr_->find(hexRefType);
+        meshConstructorTablePtr_->find(hexRefTypeName);
 
-    if (hexRefIter == meshContructorTablePtr_->end())
+    if (hexRefIter == meshConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unsupported mesh number of dimensions for hex refinement" << nl
-            << "nSolutionsD: " << nSoluD << ", nGeometricD: " << nGeomD << nl
+            << "nSolutionD: " << nSoluD << ", nGeometricD: " << nGeomD << nl
             << "Only 3D, 2D and 2D axisymmetric mesh refinements are supported"
             << exit(FatalError);
     }
@@ -81,41 +85,41 @@ Foam::autoPtr<Foam::hexRef> Foam::hexRef::New
     const labelList& cellLevel,
     const labelList& pointLevel,
     const refinementHistory& history,
-    const scalar level0Edge = -GREAT
+    const scalar level0Edge
 )
 {
-    word hexRefType;
+    word hexRefTypeName;
 
     // Infer the type of hexRef we need to use from the number of dimensions in
     // the polymesh
-    // nSolutionsD == 3 && nGeometricD == 3: 3D mesh => hexRef8
-    // nSolutionsD == 3 && nGeometricD == 2: axisymmetric mesh => hexRefAxi
-    // nSolutionsD == 2 && nGeometricD == 2: 2D mesh => hexRef4
+    // nSolutionD == 3 && nGeometricD == 3: 3D mesh => hexRef8
+    // nSolutionD == 3 && nGeometricD == 2: axisymmetric mesh => hexRef4Axi
+    // nSolutionD == 2 && nGeometricD == 2: 2D mesh => hexRef4
 
-    label nSoluD(mesh.nSolutionsD());
+    label nSoluD(mesh.nSolutionD());
     label nGeomD(mesh.nGeometricD());
 
     if (nSoluD == 3 && nGeomD == 3)
     {
-        hexRefType = "hexRef";
+        hexRefTypeName = "hexRef8";
     }
     else if (nSoluD == 3 && nGeomD == 2)
     {
-        hexRefType = "hexRefAxi";
+        hexRefTypeName = "hexRef4Axi";
     }
     else if (nSoluD == 2 && nGeomD == 2)
     {
-        hexRefType = "hexRef4";
+        hexRefTypeName = "hexRef4";
     }
 
-    meshConstructorTable::iterator hexRefIter =
-        meshConstructorTablePtr_->find(hexRefType);
+    levelsHistConstructorTable::iterator hexRefIter =
+        levelsHistConstructorTablePtr_->find(hexRefTypeName);
 
-    if (hexRefIter == meshContructorTablePtr_->end())
+    if (hexRefIter == levelsHistConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unsupported mesh number of dimensions for hex refinement" << nl
-            << "nSolutionsD: " << nSoluD << ", nGeometricD: " << nGeomD << nl
+            << "nSolutionD: " << nSoluD << ", nGeometricD: " << nGeomD << nl
             << "Only 3D, 2D and 2D axisymmetric mesh refinements are supported"
             << exit(FatalError);
     }
@@ -131,41 +135,41 @@ Foam::autoPtr<Foam::hexRef> Foam::hexRef::New
     const polyMesh& mesh,
     const labelList& cellLevel,
     const labelList& pointLevel,
-    const scalar level0Edge = -GREAT
+    const scalar level0Edge
 )
 {
-    word hexRefType;
+    word hexRefTypeName;
 
     // Infer the type of hexRef we need to use from the number of dimensions in
     // the polymesh
-    // nSolutionsD == 3 && nGeometricD == 3: 3D mesh => hexRef8
-    // nSolutionsD == 3 && nGeometricD == 2: axisymmetric mesh => hexRefAxi
-    // nSolutionsD == 2 && nGeometricD == 2: 2D mesh => hexRef4
+    // nSolutionD == 3 && nGeometricD == 3: 3D mesh => hexRef8
+    // nSolutionD == 3 && nGeometricD == 2: axisymmetric mesh => hexRef4Axi
+    // nSolutionD == 2 && nGeometricD == 2: 2D mesh => hexRef4
 
-    label nSoluD(mesh.nSolutionsD());
+    label nSoluD(mesh.nSolutionD());
     label nGeomD(mesh.nGeometricD());
 
     if (nSoluD == 3 && nGeomD == 3)
     {
-        hexRefType = "hexRef";
+        hexRefTypeName = "hexRef8";
     }
     else if (nSoluD == 3 && nGeomD == 2)
     {
-        hexRefType = "hexRefAxi";
+        hexRefTypeName = "hexRef4Axi";
     }
     else if (nSoluD == 2 && nGeomD == 2)
     {
-        hexRefType = "hexRef4";
+        hexRefTypeName = "hexRef4";
     }
 
-    meshConstructorTable::iterator hexRefIter =
-        meshConstructorTablePtr_->find(hexRefType);
+    levelsConstructorTable::iterator hexRefIter =
+        levelsConstructorTablePtr_->find(hexRefTypeName);
 
-    if (hexRefIter == meshContructorTablePtr_->end())
+    if (hexRefIter == levelsConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unsupported mesh number of dimensions for hex refinement" << nl
-            << "nSolutionsD: " << nSoluD << ", nGeometricD: " << nGeomD << nl
+            << "nSolutionD: " << nSoluD << ", nGeometricD: " << nGeomD << nl
             << "Only 3D, 2D and 2D axisymmetric mesh refinements are supported"
             << exit(FatalError);
     }
