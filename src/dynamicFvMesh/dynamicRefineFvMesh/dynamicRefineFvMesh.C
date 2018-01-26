@@ -33,6 +33,8 @@ License
 #include "pointFields.H"
 #include "sigFpe.H"
 #include "cellSet.H"
+#include "wedgePolyPatch.H"
+#include "emptyPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -429,22 +431,26 @@ Foam::dynamicRefineFvMesh::refine
             forAllConstIter(labelHashSet, masterFaces, iter)
             {
                 label facei = iter.key();
-                label patchi = boundaryMesh().whichPatch(facei);
 
                 if (isInternalFace(facei))
                 {
                     phi[facei] = phiU[facei];
                 }
-                else if (!isA<emptyPolyPatch>(boundaryMesh()[patchi]))
+                else
                 {
-                    label i = facei - boundaryMesh()[patchi].start();
+                    label patchi = boundaryMesh().whichPatch(facei);
 
-                    const fvsPatchScalarField& patchPhiU =
-                        phiU.boundaryField()[patchi];
+                    if (!isA<emptyPolyPatch>(boundaryMesh()[patchi]))
+                    {
+                        label i = facei - boundaryMesh()[patchi].start();
 
-                    fvsPatchScalarField& patchPhi = phiBf[patchi];
+                        const fvsPatchScalarField& patchPhiU =
+                            phiU.boundaryField()[patchi];
 
-                    patchPhi[i] = patchPhiU[i];
+                        fvsPatchScalarField& patchPhi = phiBf[patchi];
+
+                        patchPhi[i] = patchPhiU[i];
+                    }
                 }
             }
         }
@@ -612,19 +618,23 @@ Foam::dynamicRefineFvMesh::unrefine
 
                     if (facei >= 0)
                     {
-                        label patchi = boundaryMesh().whichPatch(facei);
                         if (isInternalFace(facei))
                         {
                             phi[facei] = phiU[facei];
                         }
-                        else if (!isA<emptyPolyPatch>(boundaryMesh()[patchi]))
+                        else
                         {
-                            label i = facei - boundaryMesh()[patchi].start();
+                            label patchi = boundaryMesh().whichPatch(facei);
 
-                            const fvsPatchScalarField& patchPhiU =
-                                phiU.boundaryField()[patchi];
-                            fvsPatchScalarField& patchPhi = phiBf[patchi];
-                            patchPhi[i] = patchPhiU[i];
+                            if (!isA<emptyPolyPatch>(boundaryMesh()[patchi]))
+                            {
+                                label i = facei - boundaryMesh()[patchi].start();
+
+                                const fvsPatchScalarField& patchPhiU =
+                                    phiU.boundaryField()[patchi];
+                                fvsPatchScalarField& patchPhi = phiBf[patchi];
+                                patchPhi[i] = patchPhiU[i];
+                            }
                         }
                     }
                 }
@@ -1249,36 +1259,95 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
             }
         }
 
-        // Also protect any cells that are less than hex
-        forAll(cells(), celli)
-        {
-            const cell& cFaces = cells()[celli];
+        bool isAxisym = (nGeometricD() == 2 && nSolutionD() == 3);
 
-            if (cFaces.size() < 6)
+        if (!isAxisym)
+        {
+            // Also protect any cells that are less than hex
+            forAll(cells(), celli)
             {
-                if (protectedCell_.set(celli, 1))
+                const cell& cFaces = cells()[celli];
+
+                if (cFaces.size() < 6)
                 {
-                    nProtected++;
-                }
-            }
-            else
-            {
-                forAll(cFaces, cFacei)
-                {
-                    if (faces()[cFaces[cFacei]].size() < 4)
+                    if (protectedCell_.set(celli, 1))
                     {
-                        if (protectedCell_.set(celli, 1))
+                        nProtected++;
+                    }
+                }
+                else
+                {
+                    forAll(cFaces, cFacei)
+                    {
+                        if (faces()[cFaces[cFacei]].size() < 4)
                         {
-                            nProtected++;
+                            if (protectedCell_.set(celli, 1))
+                            {
+                                nProtected++;
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
-        }
 
-        // Check cells for 8 corner points
-        checkEightAnchorPoints(protectedCell_, nProtected);
+            // Check cells for 8 corner points
+            checkEightAnchorPoints(protectedCell_, nProtected);
+        }
+        else
+        {
+            PackedBoolList cellIsAxisPrism(nCells(), false);
+            label nAxisPrims = 0;
+
+            // Do not protect prisms on the axis
+            forAll(cells(), celli)
+            {
+                const cell& cFaces = cells()[celli];
+
+                if (cFaces.size() == 5)
+                {
+                    forAll(cFaces, cFacei)
+                    {
+                        label facei = cFaces[cFacei];
+                        if
+                        (
+                            !isInternalFace(facei)
+                        && faces()[facei].size() != 4
+                        )
+                        {
+                            label patchi = boundaryMesh().whichPatch(facei);
+                            if (isA<wedgePolyPatch>(boundaryMesh()[patchi]))
+                            {
+                                if (protectedCell_.set(celli, 1))
+                                {
+                                    nProtected++;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!protectedCell_.get(celli))
+                    {
+                        cellIsAxisPrism.set(celli, 1);
+                        nAxisPrims++;
+                    }
+                }
+                else if (cFaces.size() < 5)
+                {
+                    if (protectedCell_.set(celli, 1))
+                    {
+                        nProtected++;
+                    }
+                }
+            }
+
+            // Check cells for 8 corner points
+            checkEightAnchorPoints(protectedCell_, nProtected);
+
+            // Unprotect prism cells on the axis
+            protectedCell_ -= cellIsAxisPrism;
+            nProtected -= nAxisPrims;
+        }
     }
 
     if (returnReduce(nProtected, sumOp<label>()) == 0)
