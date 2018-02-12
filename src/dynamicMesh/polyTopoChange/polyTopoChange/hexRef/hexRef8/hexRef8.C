@@ -2162,4 +2162,207 @@ void Foam::hexRef8::calcFaceToSplitPoint
     }
 }
 
+
+Foam::labelList Foam::hexRef8::getSplitElems() const
+{
+    if (debug)
+    {
+        checkRefinementLevels(-1, labelList(0));
+    }
+
+    if (debug)
+    {
+        Pout<< "hexRef8::getSplitPoints :"
+            << " Calculating unrefineable points" << endl;
+    }
+
+
+    if (!history_.active())
+    {
+        FatalErrorInFunction
+            << "Only call if constructed with history capability"
+            << abort(FatalError);
+    }
+
+    // Master cell
+    // -1 undetermined
+    // -2 certainly not split point
+    // >= label of master cell
+    labelList splitMaster(mesh_.nPoints(), -1);
+    labelList splitMasterLevel(mesh_.nPoints(), 0);
+
+    // Unmark all with not 8 cells
+    //const labelListList& pointCells = mesh_.pointCells();
+
+    for (label pointi = 0; pointi < mesh_.nPoints(); pointi++)
+    {
+        const labelList& pCells = mesh_.pointCells(pointi);
+
+        if (pCells.size() != 8)
+        {
+            splitMaster[pointi] = -2;
+        }
+    }
+
+    // Unmark all with different master cells
+    const labelList& visibleCells = history_.visibleCells();
+
+    forAll(visibleCells, celli)
+    {
+        const labelList& cPoints = mesh_.cellPoints(celli);
+
+        if (visibleCells[celli] != -1 && history_.parentIndex(celli) >= 0)
+        {
+            label parentIndex = history_.parentIndex(celli);
+
+            // Check same master.
+            forAll(cPoints, i)
+            {
+                label pointi = cPoints[i];
+
+                label masterCelli = splitMaster[pointi];
+
+                if (masterCelli == -1)
+                {
+                    // First time visit of point. Store parent cell and
+                    // level of the parent cell (with respect to celli). This
+                    // is additional guarantee that we're referring to the
+                    // same master at the same refinement level.
+
+                    splitMaster[pointi] = parentIndex;
+                    splitMasterLevel[pointi] = cellLevel_[celli] - 1;
+                }
+                else if (masterCelli == -2)
+                {
+                    // Already decided that point is not splitPoint
+                }
+                else if
+                (
+                    (masterCelli != parentIndex)
+                 || (splitMasterLevel[pointi] != cellLevel_[celli] - 1)
+                )
+                {
+                    // Different masters so point is on two refinement
+                    // patterns
+                    splitMaster[pointi] = -2;
+                }
+            }
+        }
+        else
+        {
+            // Either not visible or is unrefined cell
+            forAll(cPoints, i)
+            {
+                label pointi = cPoints[i];
+
+                splitMaster[pointi] = -2;
+            }
+        }
+    }
+
+    // Unmark boundary faces
+    for
+    (
+        label facei = mesh_.nInternalFaces();
+        facei < mesh_.nFaces();
+        facei++
+    )
+    {
+        const face& f = mesh_.faces()[facei];
+
+        forAll(f, fp)
+        {
+            splitMaster[f[fp]] = -2;
+        }
+    }
+
+
+    // Collect into labelList
+
+    label nSplitPoints = 0;
+
+    forAll(splitMaster, pointi)
+    {
+        if (splitMaster[pointi] >= 0)
+        {
+            nSplitPoints++;
+        }
+    }
+
+    labelList splitPoints(nSplitPoints);
+    nSplitPoints = 0;
+
+    forAll(splitMaster, pointi)
+    {
+        if (splitMaster[pointi] >= 0)
+        {
+            splitPoints[nSplitPoints++] = pointi;
+        }
+    }
+
+    return splitPoints;
+}
+
+
+Foam::labelList Foam::hexRef8::selectUnrefineElems
+(
+    const scalar unrefineLevel,
+    const PackedBoolList& markedCell,
+    const volScalarField& vFld
+) const
+{
+    // All points that can be unrefined
+    const labelList splitPoints(getSplitElems());
+
+    const scalarField pFld(minCellField(vFld));
+
+    DynamicList<label> newSplitPoints(splitPoints.size());
+
+    forAll(splitPoints, i)
+    {
+        label pointi = splitPoints[i];
+
+        if (pFld[pointi] < unrefineLevel)
+        {
+            // Check that all cells are not marked
+            const labelList& pCells = mesh_.pointCells()[pointi];
+
+            bool hasMarked = false;
+
+            forAll(pCells, pCelli)
+            {
+                if (markedCell.get(pCells[pCelli]))
+                {
+                    hasMarked = true;
+                    break;
+                }
+            }
+
+            if (!hasMarked)
+            {
+                newSplitPoints.append(pointi);
+            }
+        }
+    }
+
+
+    newSplitPoints.shrink();
+
+    // Guarantee 2:1 refinement after unrefinement
+    labelList consistentSet
+    (
+        consistentUnrefinement
+        (
+            newSplitPoints,
+            false
+        )
+    );
+    Info<< "Selected " << returnReduce(consistentSet.size(), sumOp<label>())
+        << " split points out of a possible "
+        << returnReduce(splitPoints.size(), sumOp<label>())
+        << "." << endl;
+
+    return consistentSet;
+}
+
 // ************************************************************************* //
