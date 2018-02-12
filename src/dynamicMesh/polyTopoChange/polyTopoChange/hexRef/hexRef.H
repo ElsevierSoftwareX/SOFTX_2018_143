@@ -47,6 +47,7 @@ SourceFiles
 #include "cellShapeList.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -480,6 +481,9 @@ public:
                 return level0Edge_.value();
             }
 
+            virtual label nSubCellsPerCell() const = 0;
+
+
         // Refinement
 
             //- Gets level such that the face has four points <= level.
@@ -596,30 +600,43 @@ public:
 
         // Unrefinement (undoing refinement, not arbitrary coarsening)
 
-            //- Return the points at the centre of top-level split cells
+            scalarField minCellField(const volScalarField& vFld) const;
+
+            //- Return the mid elems in top-level split cells
             //  that can be unsplit.
-            labelList getSplitPoints() const;
+            virtual labelList getSplitElems() const = 0;
 
             //- Given proposed
-            //  splitPoints to unrefine according to calculate any clashes
-            //  (due to 2:1) and return ok list of points to unrefine.
-            //  Either adds points to refine to set (maxSet = true) or
-            //  removes points to refine (maxSet = false)
-            labelList consistentUnrefinement
+            //  splitElems to unrefine according to calculate any clashes
+            //  (due to 2:1) and return ok list of mid elems to unrefine.
+            virtual labelList consistentUnrefinement
             (
-                const labelList& pointsToUnrefine,
+                const labelList& elemsToUnrefine,
                 const bool maxSet
-            ) const;
+            ) const = 0;
 
             //- Remove some refinement. Needs to be supplied output of
             //  consistentUnrefinement. Only call if undoable set.
-            //  All 8 pointCells of a split point will be combined into
-            //  the lowest numbered cell of those 8.
-            void setUnrefinement
+            //  All n edgeCells of a split edge will be combined into
+            //  the lowest numbered cell of those n.
+            virtual void setUnrefinement
             (
-                const labelList& splitPointLabels,
+                const labelList& splitElemLabels,
                 polyTopoChange&
-            );
+            ) = 0;
+
+            virtual labelList selectUnrefineElems
+            (
+                const scalar unrefineLevel,
+                const PackedBoolList& markedCell,
+                const volScalarField& vFld
+            ) const = 0;
+
+            virtual void calcFaceToSplitPoint
+            (
+                const labelList& splitElems,
+                Map<label>& faceToSplitPoint
+            ) = 0;
 
         // Write
 
