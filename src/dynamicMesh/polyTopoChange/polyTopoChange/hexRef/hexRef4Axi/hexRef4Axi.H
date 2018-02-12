@@ -145,6 +145,12 @@ public:
 
         // Refinement
 
+            //- Number of sub-cells per cell
+            label nSubCellsPerCell() const
+            {
+                return 4;
+            }
+
             //- Insert refinement. All selected cells will be split into 8.
             //  Returns per element in cells the 8 cells they were split into.
             //  Guarantees that the 0th element is the original cell label.
@@ -162,6 +168,43 @@ public:
             (
                 const labelList& cells,
                 polyTopoChange&
+            );
+
+        // Unrefinement
+            //- Return the mid elems in top-level split cells
+            //  that can be unsplit.
+            labelList getSplitElems() const;
+
+            //- Given proposed
+            //  splitElems to unrefine according to calculate any clashes
+            //  (due to 2:1) and return ok list of mid elems to unrefine.
+            labelList consistentUnrefinement
+            (
+                const labelList& elemsToUnrefine,
+                const bool maxSet
+            ) const;
+
+            //- Remove some refinement. Needs to be supplied output of
+            //  consistentUnrefinement. Only call if undoable set.
+            //  All n edgeCells of a split edge will be combined into
+            //  the lowest numbered cell of those n.
+            void setUnrefinement
+            (
+                const labelList& splitElemLabels,
+                polyTopoChange&
+            );
+
+            labelList selectUnrefineElems
+            (
+                const scalar unrefineLevel,
+                const PackedBoolList& markedCell,
+                const volScalarField& vFld
+            ) const;
+
+            void calcFaceToSplitPoint
+            (
+                const labelList& splitElems,
+                Map<label>& faceToSplitPoint
             );
 
 };

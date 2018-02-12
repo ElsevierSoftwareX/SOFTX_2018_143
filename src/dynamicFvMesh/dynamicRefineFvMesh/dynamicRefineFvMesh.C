@@ -487,13 +487,13 @@ Foam::dynamicRefineFvMesh::refine
 Foam::autoPtr<Foam::mapPolyMesh>
 Foam::dynamicRefineFvMesh::unrefine
 (
-    const labelList& splitPoints
+    const labelList& splitElems
 )
 {
     polyTopoChange meshMod(*this);
 
     // Play refinement commands into mesh changer.
-    meshCutter_->setUnrefinement(splitPoints, meshMod);
+    meshCutter_->setUnrefinement(splitElems, meshMod);
 
 
     // Save information on faces that will be combined
@@ -502,28 +502,8 @@ Foam::dynamicRefineFvMesh::unrefine
     // Find the faceMidPoints on cells to be combined.
     // for each face resulting of split of face into four store the
     // midpoint
-    Map<label> faceToSplitPoint(3*splitPoints.size());
-
-    {
-        forAll(splitPoints, i)
-        {
-            label pointi = splitPoints[i];
-
-            const labelList& pEdges = pointEdges()[pointi];
-
-            forAll(pEdges, j)
-            {
-                label otherPointi = edges()[pEdges[j]].otherVertex(pointi);
-
-                const labelList& pFaces = pointFaces()[otherPointi];
-
-                forAll(pFaces, pFacei)
-                {
-                    faceToSplitPoint.insert(pFaces[pFacei], otherPointi);
-                }
-            }
-        }
-    }
+    Map<label> faceToSplitPoint(0);
+    meshCutter_->calcFaceToSplitPoint(splitElems, faceToSplitPoint);
 
 
     // Change mesh and generate map.
@@ -705,6 +685,7 @@ Foam::dynamicRefineFvMesh::maxCellField(const volScalarField& vFld) const
 }
 
 
+// Simple (non-parallel) interpolation by averaging.
 Foam::scalarField
 Foam::dynamicRefineFvMesh::cellToPoint(const scalarField& vFld) const
 {
@@ -863,66 +844,6 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 
     Info<< "Selected " << returnReduce(consistentSet.size(), sumOp<label>())
         << " cells for refinement out of " << globalData().nTotalCells()
-        << "." << endl;
-
-    return consistentSet;
-}
-
-
-Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
-(
-    const scalar unrefineLevel,
-    const PackedBoolList& markedCell,
-    const scalarField& pFld
-) const
-{
-    // All points that can be unrefined
-    const labelList splitPoints(meshCutter_->getSplitPoints());
-
-    DynamicList<label> newSplitPoints(splitPoints.size());
-
-    forAll(splitPoints, i)
-    {
-        label pointi = splitPoints[i];
-
-        if (pFld[pointi] < unrefineLevel)
-        {
-            // Check that all cells are not marked
-            const labelList& pCells = pointCells()[pointi];
-
-            bool hasMarked = false;
-
-            forAll(pCells, pCelli)
-            {
-                if (markedCell.get(pCells[pCelli]))
-                {
-                    hasMarked = true;
-                    break;
-                }
-            }
-
-            if (!hasMarked)
-            {
-                newSplitPoints.append(pointi);
-            }
-        }
-    }
-
-
-    newSplitPoints.shrink();
-
-    // Guarantee 2:1 refinement after unrefinement
-    labelList consistentSet
-    (
-        meshCutter_->consistentUnrefinement
-        (
-            newSplitPoints,
-            false
-        )
-    );
-    Info<< "Selected " << returnReduce(consistentSet.size(), sumOp<label>())
-        << " split points out of a possible "
-        << returnReduce(splitPoints.size(), sumOp<label>())
         << "." << endl;
 
     return consistentSet;
@@ -1549,26 +1470,26 @@ bool Foam::dynamicRefineFvMesh::update()
 
         {
             // Select unrefineable points that are not marked in refineCell
-            labelList pointsToUnrefine
+            labelList elemsToUnrefine
             (
-                selectUnrefinePoints
+                meshCutter_->selectUnrefineElems
                 (
                     unrefineLevel,
                     refineCell,
-                    maxCellField(vFld)
+                    vFld
                 )
             );
 
-            label nSplitPoints = returnReduce
+            label nSplitElems = returnReduce
             (
-                pointsToUnrefine.size(),
+                elemsToUnrefine.size(),
                 sumOp<label>()
             );
 
-            if (nSplitPoints > 0)
+            if (nSplitElems > 0)
             {
                 // Refine/update mesh
-                unrefine(pointsToUnrefine);
+                unrefine(elemsToUnrefine);
 
                 hasChanged = true;
             }

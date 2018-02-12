@@ -78,7 +78,7 @@ SourceFiles
 #define dynamicRefineFvMesh_H
 
 #include "dynamicFvMesh.H"
-#include "hexRef8.H"
+#include "hexRef.H"
 #include "PackedBoolList.H"
 #include "Switch.H"
 
@@ -152,7 +152,7 @@ protected:
             scalarField maxPointField(const scalarField&) const;
 
             //- Get point max of connected cell
-            scalarField maxCellField(const volScalarField&) const;
+            scalarField minCellField(const volScalarField&) const;
 
             scalarField cellToPoint(const scalarField& vFld) const;
 
@@ -178,14 +178,6 @@ protected:
                 const label maxCells,
                 const label maxRefinement,
                 const PackedBoolList& candidateCell
-            ) const;
-
-            //- Select points that can be unrefined.
-            virtual labelList selectUnrefinePoints
-            (
-                const scalar unrefineLevel,
-                const PackedBoolList& markedCell,
-                const scalarField& pFld
             ) const;
 
             //- Extend markedCell with cell-face-cell.

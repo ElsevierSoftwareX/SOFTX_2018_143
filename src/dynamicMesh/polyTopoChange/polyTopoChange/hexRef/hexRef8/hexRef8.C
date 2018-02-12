@@ -1699,4 +1699,467 @@ Foam::labelListList Foam::hexRef8::setRefinement
 }
 
 
+Foam::labelList Foam::hexRef8::consistentUnrefinement
+(
+    const labelList& elemsToUnrefine,
+    const bool maxSet
+) const
+{
+    if (debug)
+    {
+        Pout<< "hexRef8::consistentUnrefinement :"
+            << " Determining 2:1 consistent unrefinement" << endl;
+    }
+
+    if (maxSet)
+    {
+        FatalErrorInFunction
+            << "maxSet not implemented yet."
+            << abort(FatalError);
+    }
+
+    // For hexRef8, unrefinement is based on points
+    const labelList& pointsToUnrefine(elemsToUnrefine);
+
+    // Loop, modifying pointsToUnrefine, until no more changes to due to 2:1
+    // conflicts.
+    // maxSet = false : unselect points to refine
+    // maxSet = true: select points to refine
+
+    // Maintain boolList for pointsToUnrefine and cellsToUnrefine
+    PackedBoolList unrefinePoint(mesh_.nPoints());
+
+    forAll(pointsToUnrefine, i)
+    {
+        label pointi = pointsToUnrefine[i];
+
+        unrefinePoint.set(pointi);
+    }
+
+
+    while (true)
+    {
+        // Construct cells to unrefine
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        PackedBoolList unrefineCell(mesh_.nCells());
+
+        forAll(unrefinePoint, pointi)
+        {
+            if (unrefinePoint.get(pointi))
+            {
+                const labelList& pCells = mesh_.pointCells(pointi);
+
+                forAll(pCells, j)
+                {
+                    unrefineCell.set(pCells[j]);
+                }
+            }
+        }
+
+
+        label nChanged = 0;
+
+
+        // Check 2:1 consistency taking refinement into account
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // Internal faces.
+        for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+        {
+            label own = mesh_.faceOwner()[facei];
+            label ownLevel = cellLevel_[own] - unrefineCell.get(own);
+
+            label nei = mesh_.faceNeighbour()[facei];
+            label neiLevel = cellLevel_[nei] - unrefineCell.get(nei);
+
+            if (ownLevel < (neiLevel-1))
+            {
+                // Since was 2:1 this can only occur if own is marked for
+                // unrefinement.
+
+                if (maxSet)
+                {
+                    unrefineCell.set(nei);
+                }
+                else
+                {
+                    // could also combine with unset:
+                    // if (!unrefineCell.unset(own))
+                    // {
+                    //     FatalErrorInFunction
+                    //         << "problem cell already unset"
+                    //         << abort(FatalError);
+                    // }
+                    if (unrefineCell.get(own) == 0)
+                    {
+                        FatalErrorInFunction
+                            << "problem" << abort(FatalError);
+                    }
+
+                    unrefineCell.unset(own);
+                }
+                nChanged++;
+            }
+            else if (neiLevel < (ownLevel-1))
+            {
+                if (maxSet)
+                {
+                    unrefineCell.set(own);
+                }
+                else
+                {
+                    if (unrefineCell.get(nei) == 0)
+                    {
+                        FatalErrorInFunction
+                            << "problem" << abort(FatalError);
+                    }
+
+                    unrefineCell.unset(nei);
+                }
+                nChanged++;
+            }
+        }
+
+
+        // Coupled faces. Swap owner level to get neighbouring cell level.
+        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+
+        forAll(neiLevel, i)
+        {
+            label own = mesh_.faceOwner()[i+mesh_.nInternalFaces()];
+
+            neiLevel[i] = cellLevel_[own] - unrefineCell.get(own);
+        }
+
+        // Swap to neighbour
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
+
+        forAll(neiLevel, i)
+        {
+            label facei = i+mesh_.nInternalFaces();
+            label own = mesh_.faceOwner()[facei];
+            label ownLevel = cellLevel_[own] - unrefineCell.get(own);
+
+            if (ownLevel < (neiLevel[i]-1))
+            {
+                if (!maxSet)
+                {
+                    if (unrefineCell.get(own) == 0)
+                    {
+                        FatalErrorInFunction
+                            << "problem" << abort(FatalError);
+                    }
+
+                    unrefineCell.unset(own);
+                    nChanged++;
+                }
+            }
+            else if (neiLevel[i] < (ownLevel-1))
+            {
+                if (maxSet)
+                {
+                    if (unrefineCell.get(own) == 1)
+                    {
+                        FatalErrorInFunction
+                            << "problem" << abort(FatalError);
+                    }
+
+                    unrefineCell.set(own);
+                    nChanged++;
+                }
+            }
+        }
+
+        reduce(nChanged, sumOp<label>());
+
+        if (debug)
+        {
+            Pout<< "hexRef8::consistentUnrefinement :"
+                << " Changed " << nChanged
+                << " refinement levels due to 2:1 conflicts."
+                << endl;
+        }
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+
+
+        // Convert cellsToUnrefine back into points to unrefine
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // Knock out any point whose cell neighbour cannot be unrefined.
+        forAll(unrefinePoint, pointi)
+        {
+            if (unrefinePoint.get(pointi))
+            {
+                const labelList& pCells = mesh_.pointCells(pointi);
+
+                forAll(pCells, j)
+                {
+                    if (!unrefineCell.get(pCells[j]))
+                    {
+                        unrefinePoint.unset(pointi);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Convert back to labelList.
+    label nSet = 0;
+
+    forAll(unrefinePoint, pointi)
+    {
+        if (unrefinePoint.get(pointi))
+        {
+            nSet++;
+        }
+    }
+
+    labelList newPointsToUnrefine(nSet);
+    nSet = 0;
+
+    forAll(unrefinePoint, pointi)
+    {
+        if (unrefinePoint.get(pointi))
+        {
+            newPointsToUnrefine[nSet++] = pointi;
+        }
+    }
+
+    return newPointsToUnrefine;
+}
+
+void Foam::hexRef8::setUnrefinement
+(
+    const labelList& splitElemLabels,
+    polyTopoChange& meshMod
+)
+{
+    if (!history_.active())
+    {
+        FatalErrorInFunction
+            << "Only call if constructed with history capability"
+            << abort(FatalError);
+    }
+
+    // For hexRef8, unrefinement is based on points
+    const labelList& splitPointLabels(splitElemLabels);
+
+    if (debug)
+    {
+        Pout<< "hexRef8::setUnrefinement :"
+            << " Checking initial mesh just to make sure" << endl;
+
+        checkMesh();
+
+        forAll(cellLevel_, celli)
+        {
+            if (cellLevel_[celli] < 0)
+            {
+                FatalErrorInFunction
+                    << "Illegal cell level " << cellLevel_[celli]
+                    << " for cell " << celli
+                    << abort(FatalError);
+            }
+        }
+
+
+        // Write to sets.
+        pointSet pSet(mesh_, "splitPoints", splitPointLabels);
+        pSet.write();
+
+        cellSet cSet(mesh_, "splitPointCells", splitPointLabels.size());
+
+        forAll(splitPointLabels, i)
+        {
+            const labelList& pCells = mesh_.pointCells(splitPointLabels[i]);
+
+            forAll(pCells, j)
+            {
+                cSet.insert(pCells[j]);
+            }
+        }
+        cSet.write();
+
+        Pout<< "hexRef8::setRefinement : Dumping " << pSet.size()
+            << " points and "
+            << cSet.size() << " cells for unrefinement to" << nl
+            << "    pointSet " << pSet.objectPath() << nl
+            << "    cellSet " << cSet.objectPath()
+            << endl;
+    }
+
+
+    labelList cellRegion;
+    labelList cellRegionMaster;
+    labelList facesToRemove;
+
+    {
+        labelHashSet splitFaces(12*splitPointLabels.size());
+
+        forAll(splitPointLabels, i)
+        {
+            const labelList& pFaces = mesh_.pointFaces()[splitPointLabels[i]];
+
+            forAll(pFaces, j)
+            {
+                splitFaces.insert(pFaces[j]);
+            }
+        }
+
+        // Check with faceRemover what faces will get removed. Note that this
+        // can be more (but never less) than splitFaces provided.
+        faceRemover_.compatibleRemoves
+        (
+            splitFaces.toc(),   // pierced faces
+            cellRegion,         // per cell -1 or region it is merged into
+            cellRegionMaster,   // per region the master cell
+            facesToRemove       // new faces to be removed.
+        );
+
+        if (facesToRemove.size() != splitFaces.size())
+        {
+            FatalErrorInFunction
+                << "Ininitial set of split points to unrefine does not"
+                << " seem to be consistent or not mid points of refined cells"
+                << abort(FatalError);
+        }
+    }
+
+    // Redo the region master so it is consistent with our master.
+    // This will guarantee that the new cell (for which faceRemover uses
+    // the region master) is already compatible with our refinement structure.
+
+    forAll(splitPointLabels, i)
+    {
+        label pointi = splitPointLabels[i];
+
+        // Get original cell label
+
+        const labelList& pCells = mesh_.pointCells(pointi);
+
+        // Check
+        if (pCells.size() != 8)
+        {
+            FatalErrorInFunction
+                << "splitPoint " << pointi
+                << " should have 8 cells using it. It has " << pCells
+                << abort(FatalError);
+        }
+
+
+        // Check that the lowest numbered pCells is the master of the region
+        // (should be guaranteed by directRemoveFaces)
+        //if (debug)
+        {
+            label masterCelli = min(pCells);
+
+            forAll(pCells, j)
+            {
+                label celli = pCells[j];
+
+                label region = cellRegion[celli];
+
+                if (region == -1)
+                {
+                    FatalErrorInFunction
+                        << "Ininitial set of split points to unrefine does not"
+                        << " seem to be consistent or not mid points"
+                        << " of refined cells" << nl
+                        << "cell:" << celli << " on splitPoint " << pointi
+                        << " has no region to be merged into"
+                        << abort(FatalError);
+                }
+
+                if (masterCelli != cellRegionMaster[region])
+                {
+                    FatalErrorInFunction
+                        << "cell:" << celli << " on splitPoint:" << pointi
+                        << " in region " << region
+                        << " has master:" << cellRegionMaster[region]
+                        << " which is not the lowest numbered cell"
+                        << " among the pointCells:" << pCells
+                        << abort(FatalError);
+                }
+            }
+        }
+    }
+
+    // Insert all commands to combine cells. Never fails so don't have to
+    // test for success.
+    faceRemover_.setRefinement
+    (
+        facesToRemove,
+        cellRegion,
+        cellRegionMaster,
+        meshMod
+    );
+
+    // Remove the 8 cells that originated from merging around the split point
+    // and adapt cell levels (not that pointLevels stay the same since points
+    // either get removed or stay at the same position.
+    forAll(splitPointLabels, i)
+    {
+        label pointi = splitPointLabels[i];
+
+        const labelList& pCells = mesh_.pointCells(pointi);
+
+        label masterCelli = min(pCells);
+
+        forAll(pCells, j)
+        {
+            cellLevel_[pCells[j]]--;
+        }
+
+        history_.combineCells(masterCelli, pCells);
+    }
+
+    // Mark files as changed
+    setInstance(mesh_.facesInstance());
+
+    // history_.updateMesh will take care of truncating.
+}
+
+void Foam::hexRef8::calcFaceToSplitPoint
+(
+    const labelList& splitElems,
+    Map<label>& faceToSplitPoint
+)
+{
+    // Save information on faces that will be combined
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // For hexRef8, the split elems are points
+    const labelList& splitPoints(splitElems);
+
+    faceToSplitPoint.resize(3*splitElems.size());
+
+    {
+        forAll(splitPoints, i)
+        {
+            label pointi = splitPoints[i];
+
+            const labelList& pEdges = mesh_.pointEdges()[pointi];
+
+            forAll(pEdges, j)
+            {
+                label otherPointi = mesh_.edges()[pEdges[j]].otherVertex(pointi);
+
+                const labelList& pFaces = mesh_.pointFaces()[otherPointi];
+
+                forAll(pFaces, pFacei)
+                {
+                    faceToSplitPoint.insert(pFaces[pFacei], otherPointi);
+                }
+            }
+        }
+    }
+}
+
 // ************************************************************************* //
