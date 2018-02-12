@@ -1496,7 +1496,6 @@ Foam::labelListList Foam::hexRef4Axi::setRefinement
                     label edgei = meshTools::findEdge (mesh_, pointi, nextpointi);
                     if (edgeMidPoint[edgei] >=0)
                     {
-                        DynamicList<label> faceVerts(4);
                         label pointj = f[f.rcIndex(fp)];
                         label prevPointj = f[f.rcIndex(f.rcIndex(fp))];
                         label edgep = meshTools::findEdge(mesh_, prevPointj, pointj);
