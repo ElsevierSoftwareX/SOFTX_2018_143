@@ -145,12 +145,6 @@ public:
 
         // Refinement
 
-            //- Number of sub-cells per cell
-            label nSubCellsPerCell() const
-            {
-                return 4;
-            }
-
             //- Insert refinement. All selected cells will be split into 8.
             //  Returns per element in cells the 8 cells they were split into.
             //  Guarantees that the 0th element is the original cell label.

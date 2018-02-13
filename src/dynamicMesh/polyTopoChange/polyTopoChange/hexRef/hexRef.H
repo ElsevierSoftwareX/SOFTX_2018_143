@@ -481,9 +481,6 @@ public:
                 return level0Edge_.value();
             }
 
-            virtual label nSubCellsPerCell() const = 0;
-
-
         // Refinement
 
             //- Gets level such that the face has four points <= level.
