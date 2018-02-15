@@ -463,7 +463,7 @@ void Foam::hexRef4Axi::createInternalFaces
             // In 2D case this should never happen, as the shared faces with uncutted mesh
             // can be only the ones splitted in two which have two anchors and two middle edge points.
 
-            Info << "Should never happen: nAnchors == 1" << endl;
+            //Info << "Should never happen: nAnchors == 1" << endl;
 
             // Find the one anchor.
             label anchorFp = -1;
