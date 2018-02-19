@@ -849,6 +849,68 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
     return consistentSet;
 }
 
+// YO- This is here only to preserve compatibility with the official release.
+//     It is not used by the refinement procedure, but some utilities such as
+//     decomposePar rely on it.
+Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
+(
+    const scalar unrefineLevel,
+    const PackedBoolList& markedCell,
+    const scalarField& pFld
+) const
+{
+    // All points that can be unrefined
+    const labelList splitPoints(meshCutter_->getSplitElems());
+
+    DynamicList<label> newSplitPoints(splitPoints.size());
+
+    forAll(splitPoints, i)
+    {
+        label pointi = splitPoints[i];
+
+        if (pFld[pointi] < unrefineLevel)
+        {
+            // Check that all cells are not marked
+            const labelList& pCells = pointCells()[pointi];
+
+            bool hasMarked = false;
+
+            forAll(pCells, pCelli)
+            {
+                if (markedCell.get(pCells[pCelli]))
+                {
+                    hasMarked = true;
+                    break;
+                }
+            }
+
+            if (!hasMarked)
+            {
+                newSplitPoints.append(pointi);
+            }
+        }
+    }
+
+
+    newSplitPoints.shrink();
+
+    // Guarantee 2:1 refinement after unrefinement
+    labelList consistentSet
+    (
+        meshCutter_->consistentUnrefinement
+        (
+            newSplitPoints,
+            false
+        )
+    );
+    Info<< "Selected " << returnReduce(consistentSet.size(), sumOp<label>())
+        << " split points out of a possible "
+        << returnReduce(splitPoints.size(), sumOp<label>())
+        << "." << endl;
+
+    return consistentSet;
+}
+//-YO
 
 void Foam::dynamicRefineFvMesh::extendMarkedCells
 (
