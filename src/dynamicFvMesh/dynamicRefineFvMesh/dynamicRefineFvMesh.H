@@ -180,6 +180,18 @@ protected:
                 const PackedBoolList& candidateCell
             ) const;
 
+// YO- This is here only to preserve compatibility with the official release.
+//     It is not used by the refinement procedure, but some utilities such as
+//     decomposePar rely on it.
+            //- Select points that can be unrefined.
+            virtual labelList selectUnrefinePoints
+            (
+                const scalar unrefineLevel,
+                const PackedBoolList& markedCell,
+                const scalarField& pFld
+            ) const;
+// YO
+
             //- Extend markedCell with cell-face-cell.
             void extendMarkedCells(PackedBoolList& markedCell) const;
 
