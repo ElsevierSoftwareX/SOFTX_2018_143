@@ -731,10 +731,22 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                 {
                     if( cellLevel[cellI] > 0 )
                     {
-                        uniqueIndex[cellI] = nCells() + topParentID
-                        (
-                            meshCutter()->history().parentIndex(cellI)
-                        );
+                        //YO- 2D refinement uses fixed lists with unset parents;
+                        //    we need to check that the parentIndex is set
+                        label parentI = meshCutter()->history().parentIndex(cellI);
+
+                        if (parentI >= 0)
+                        {
+                            uniqueIndex[cellI] = nCells() + topParentID
+                            (
+                                meshCutter()->history().parentIndex(cellI)
+                            );
+                        }
+                        else
+                        {
+                            uniqueIndex[cellI] = cellI;
+                        }
+                        //-YO
                     }
                     else
                     {
@@ -752,6 +764,7 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                 labelList localIndex(nCells(),0);
                 pointField coarsePoints(nCoarse,vector::zero);
                 scalarField coarseWeights(nCoarse,0.0);
+                label nRefinementDimensions(nGeometricD());
 
                 forAll(uniqueIndex, cellI)
                 {
@@ -760,7 +773,7 @@ bool Foam::dynamicRefineBalancedFvMesh::update()
                     // If 2D refinement (quadtree) is ever implemented, this '3'
                     // should be set in general as the number of refinement
                     // dimensions.
-                    label w = (1 << (3*cellLevel[cellI]));
+                    label w = (1 << (nRefinementDimensions*cellLevel[cellI]));
 
                     coarseWeights[localIndex[cellI]] += 1.0;
                     coarsePoints[localIndex[cellI]] += C()[cellI]/w;
