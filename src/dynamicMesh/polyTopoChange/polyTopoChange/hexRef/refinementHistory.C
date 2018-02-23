@@ -1223,6 +1223,10 @@ void Foam::refinementHistory::countProc
     labelList& splitCellNum
 ) const
 {
+
+    const polyMesh& mesh = dynamic_cast<const polyMesh&>(db());
+    label nSubCellsPerCell = 1 << mesh.nGeometricD();
+
     if (splitCellProc[index] != newProcNo)
     {
         // Different destination processor from other cells using this
@@ -1235,7 +1239,7 @@ void Foam::refinementHistory::countProc
         splitCellNum[index]++;
 
         // Increment parent if whole splitCell moves to same processor
-        if (splitCellNum[index] == 8)
+        if (splitCellNum[index] == nSubCellsPerCell)
         {
             if (debug)
             {
@@ -1333,6 +1337,9 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
     //Pout<< "refinementHistory::distribute :"
     //    << " splitCellNum:" << splitCellNum << endl;
 
+    const polyMesh& mesh = dynamic_cast<const polyMesh&>(db());
+    label nSubCellsPerCell = 1 << mesh.nGeometricD();
+
 
     // Create subsetted refinement tree consisting of all parents that
     // move in their whole to other processor.
@@ -1351,7 +1358,7 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
 
         forAll(splitCells_, index)
         {
-            if (splitCellProc[index] == proci && splitCellNum[index] == 8)
+            if (splitCellProc[index] == proci && splitCellNum[index] == nSubCellsPerCell)
             {
                 // Entry moves in its whole to proci
                 oldToNew[index] = newSplitCells.size();
@@ -1439,8 +1446,6 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
 
     // Remove all entries. Leave storage intact.
     splitCells_.clear();
-
-    const polyMesh& mesh = dynamic_cast<const polyMesh&>(db());
 
     visibleCells_.setSize(mesh.nCells());
     visibleCells_ = -1;
