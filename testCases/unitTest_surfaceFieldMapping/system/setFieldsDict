@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// pressure inside the droplets is set higher due to the surface tension
+// and radius (dP = sigma/r in 2D)
+defaultFieldValues
+(
+    volScalarFieldValue alpha.water 0
+    //volScalarFieldValue alpha1 0
+    volVectorFieldValue U (0 0 0)
+    volScalarFieldValue p_rgh 100000
+);
+
+regions
+(
+    //Set droplet
+    sphereToCell
+    {
+        centre (0 0.0045 0);
+        radius 0.0005; //1 mm diameter
+        fieldValues
+        (
+            volScalarFieldValue alpha.water 1
+            //volScalarFieldValue alpha1 1
+            volVectorFieldValue U (0 0 -1)
+            volScalarFieldValue p_rgh 100140
+        );
+
+    }
+
+
+);
+
+
+// ************************************************************************* //

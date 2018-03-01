@@ -1,0 +1,80 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+touchCaseFoam()
+{
+	touch case.foam
+
+	if [ -d processor0 ];then
+		nproc=`ls -d processor*/ | wc -l`
+		for (( i=0; i<=$nproc-1; i++ ))
+		do
+			touch processor$i/case.foam
+		done
+	fi
+}
+
+cleanCase()
+{
+	# remove logFiles
+	rm -rf log*
+
+	# remove all timeSteps but 0
+	rm -rf 0.[0-9]* && rm -rf [1-9]* 
+
+	# remove Mesh
+	CASEDIR="$PWD"
+	MESH="$CASEDIR/constant/polyMesh"
+	if [ -d $MESH ]
+	  then
+	    cd "$MESH"
+	    rm -rf owner*
+	    rm -rf neighbour*
+	    rm -rf point*
+	    rm -rf face*
+	    rm -rf boundary*
+	    rm -rf set*
+	    rm -rf cell*
+	    rm -rf level0Edge*
+	    rm -rf refinementHistory*
+	    rm -rf surfaceIndex.gz*
+	    cd $CASEDIR
+	fi
+
+	# remove Processors
+	rm -rf processor*
+
+	# restore 0
+	rm -rf 0
+	cp -r org/ 0
+}
+##############################################
+
+cleanCase
+rm -r VTK
+
+
+runApplication blockMesh
+
+# Try to initialize fields before decomposePar
+# it should still flip surfaceVectorFields
+# 		initSurfaceFields
+
+# decompose case
+decomposePar
+
+# initialize decomposed case
+mpirun -np 2 initSurfaceFields -parallel
+
+# do a mesh update, including AMR and LB
+mpirun -np 2 meshUpdater -parallel
+
+# preproc for visualization
+foamToVTK -surfaceFields -case processor0 -poly > log.VTK
+foamToVTK -surfaceFields -case processor1 -poly >> log.VTK
+
+# create case.foam in each processor
+touchCaseFoam
