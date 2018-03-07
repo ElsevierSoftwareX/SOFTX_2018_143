@@ -1,0 +1,45 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          transportProperties;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+//FC-72 at 1 bar
+phases (water air);
+
+water
+{
+    transportModel  Newtonian;
+    nu              nu [0 2 -1 0 0 0 0] 2.797e-7;
+    rho             rho [1 -3 0 0 0 0 0] 1619.82;
+}
+
+air
+{
+    transportModel  Newtonian;
+    nu              nu [0 2 -1 0 0 0 0] 7.081e-7;
+    rho             rho [1 -3 0 0 0 0 0] 13.36;
+}
+
+sigma           sigma [1 0 -2 0 0 0 0] 0.008273;
+
+// ************************************************************************* //

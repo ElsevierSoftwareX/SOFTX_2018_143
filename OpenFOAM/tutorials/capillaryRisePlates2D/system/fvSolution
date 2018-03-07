@@ -1,0 +1,128 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.7.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "alpha.water.*"
+    {
+        nAlphaCorr      2;
+        nAlphaSubCycles 2;
+        cAlpha          1;
+        icAlpha         0; // isotropic compression 0
+ minComprVel      0.0001;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          PBiCG;
+        preconditioner  DILU;
+        smoother        symGaussSeidel;
+        tolerance       1e-14;
+        relTol          0;
+
+        //-- interfaceCompression experimental stuff
+        solveExpl       OPT_EXPL_SOLVE;
+        comprNonCoupledBounds OPT_COMPRESS_NON_COUPLED_BOUNDS; 
+        compressInterface OPT_COMPRESS_INTERFACE;         //Option only with solvExpl no;
+        
+        minIsoComprVel 0; // 0.0
+        isIsoUf        0; // 1
+        //--
+    }
+
+    alphaS
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-10;
+        relTol          0;
+    }
+
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-10;
+        relTol          0;
+    }
+
+    p_rgh
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-07;
+        relTol          0.05;
+    }
+
+    p_rghFinal
+    {
+        $p_rgh;
+        tolerance       1e-07;
+        relTol          0;
+    }
+
+    U
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    UFinal
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    momentumPredictor yes;
+    nCorrectors     4;
+ nNonOrthogonalCorrectors      1;
+    nAlphaCorr      1;
+    nAlphaSubCycles 2;
+    cAlpha          1;
+}
+
+relaxationFactors
+{
+    fields
+    {
+    }
+    equations
+    {
+        ".*" 1;
+    }
+}
+
+interfaceReconstruction
+{
+    interpolationMethod     inverseDistance2;
+    //interpolationMethod     linearFit2; //- gives better results on unstructured meshes
+    smoothSym               no;        //- smooth the curvature at symmetryPlanePlanes
+    distanceTreshold        2e-4;      //- important if dynamicMesh is used based on distance
+    thinFilm                no;        //- do not delete nHat at wall and at symmetryPlanePlanes
+                                       //  if there is only a thin liquid or vapor film
+}
+
+
+
+// *************************************************************************//

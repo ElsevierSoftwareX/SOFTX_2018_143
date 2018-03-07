@@ -1,0 +1,165 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+     "alpha.water.*"
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 3;
+        cAlpha          1;
+        icAlpha         0; // isotropic compression 0
+        minComprVel     0; // minimal compression-scaling velocity 0.001
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          PBiCG;
+        preconditioner  DILU;
+        smoother        symGaussSeidel;
+        tolerance       1e-14;
+        relTol          0;
+    }
+
+    pcorr
+    {
+        solver         PCG;
+        preconditioner
+        {
+            preconditioner   GAMG;
+            tolerance        1e-3;
+            relTol           0;
+
+            smoother         GaussSeidel;
+            nPreSweeps       0;
+            nPostSweeps      2;
+            nBottomSweeps    2;
+
+            cacheAgglomeration false;
+            nCellsInCoarsestLevel 950;
+            agglomerator     faceAreaPair;
+            mergeLevels      1;
+        };
+
+        tolerance        1e-8;
+        relTol           0;
+//      maxIter          100;
+    };
+
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-10;
+        relTol          0;
+    }
+
+    p_rgh
+    {
+        solver           GAMG;
+        tolerance        1e-08;
+        relTol           0.05;
+
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+        nFinestSweeps    2;
+
+        cacheAgglomeration false;
+        nCellsInCoarsestLevel 950;
+        agglomerator     faceAreaPair;
+        mergeLevels      1;
+    };
+
+    p_rghFinal
+    {
+        solver         PCG;
+        preconditioner
+        {
+            preconditioner   GAMG;
+            tolerance        1e-08;
+            relTol           1e-03;
+
+            nVcycles         2;
+
+            smoother         GaussSeidel;
+            nPreSweeps       0;
+            nPostSweeps      2;
+            nFinestSweeps    2;
+
+            cacheAgglomeration false;
+            nCellsInCoarsestLevel 950;
+            agglomerator     faceAreaPair;
+            mergeLevels      1;
+        };
+
+        tolerance        1e-08;
+        relTol           0;
+        maxIter          20;
+    };
+
+    U
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-6;
+        relTol           0;
+        nSweeps          1;
+    };
+
+    UFinal
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    psi
+    {
+        solver           GAMG;
+        tolerance        1e-06;
+        relTol           0;
+
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      1;
+        nFinestSweeps    1;
+
+        cacheAgglomeration false;
+        nCellsInCoarsestLevel 950;
+        agglomerator     faceAreaPair;
+        mergeLevels      1;
+    };
+}
+
+PISO
+{
+    momentumPredictor no;
+    nCorrectors     3;
+    nNonOrthogonalCorrectors 0;
+    nAlphaCorr      1;
+    nAlphaSubCycles 3;
+    pRefPoint       (0.0 0.0 0.0);
+    pRefValue       0;
+}
+
+PIMPLE
+{
+    cAlpha          1;
+}
+
+// ************************************************************************* //

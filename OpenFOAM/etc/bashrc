@@ -1,0 +1,54 @@
+#!/bin/sh
+# Author: Rettenmaier Deising
+
+# Initialize AMR_LB_PROJECT variable, necessary to compile libraries
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+export AMR_LB_PROJECT=${DIR%%/etc*}
+
+echo $AMR_LB_PROJECT
+
+# Add usefull scripts to path
+export PATH=$AMR_LB_PROJECT/scripts:$PATH
+
+
+# Frequent Errormessages of OpenFOAM compiler will be highlighted for better
+# readability
+fun()
+{
+	awk '{ gsub("SOURCE=", 								"\033[1;50m&\033[0m");
+
+		   gsub("is up to date.", 						"\033[1;31m&\033[0m"); 
+
+		   gsub("undefined reference", 					"\033[1;36m&\033[0m");
+		   gsub("expected class-name before", 			"\033[1;36m&\033[0m");
+		   gsub("was not declared in this scope", 		"\033[1;36m&\033[0m");
+		   gsub("does not have any field named", 		"\033[1;36m&\033[0m");
+		   gsub("does not match any in class", 			"\033[1;36m&\033[0m");
+		   gsub("uninitialized reference member", 		"\033[1;36m&\033[0m");
+		   gsub("invalid initialization of reference of type", 		"\033[1;36m&\033[0m");
+		   gsub("No rule to make target", 				"\033[1;36m&\033[0m");
+		   gsub("No such file or directory", 			"\033[1;36m&\033[0m");
+		   gsub("no matching function for call to", 	"\033[1;36m&\033[0m");
+		   gsub("no match for", 						"\033[1;36m&\033[0m"); 
+		   gsub("expected ‘,’ or ‘...’ before ‘const’", "\033[1;36m&\033[0m");
+		   gsub("expected ‘;’ before ‘:’", 				"\033[1;36m&\033[0m");
+		   gsub("expected identifier before", 			"\033[1;36m&\033[0m");
+		   gsub("expected primary-expression before", 	"\033[1;36m&\033[0m");
+		   gsub("has no member named", 					"\033[1;36m&\033[0m");
+		   gsub("follows constructor delegation", 		"\033[1;36m&\033[0m");
+		   gsub("assignment of read-only location", 	"\033[1;36m&\033[0m");
+		   gsub("cannot call member function",            "\033[1;36m&\033[0m");
+
+		   gsub("warning:",								"\033[1;34m&\033[0m");
+		   gsub("will be initialized after:",			"\033[1;34m&\033[0m");
+
+		   gsub("multiple definition of",				"\033[1;32m&\033[0m");
+		   gsub("error", 								"\033[1;32m&\033[0m");
+		   gsub("missing seperator.", 					"\033[1;32m&\033[0m");
+		   print 
+		}'
+}
+
+
+alias wmake="wmake 2>&1 | fun"

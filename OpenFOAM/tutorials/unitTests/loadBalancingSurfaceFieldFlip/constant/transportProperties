@@ -1,0 +1,174 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM Extend Project: Open Source CFD        |
+|  \\    /   O peration     | Version:  1.6-ext                               |
+|   \\  /    A nd           | Web:      www.extend-project.de                 |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+phases (water air);
+
+water
+{
+    transportModel  Newtonian;
+    nu              nu [ 0 2 -1 0 0 0 0 ] 1e-06;
+    rho             rho [ 1 -3 0 0 0 0 0 ] 1000; 
+}
+
+air
+{
+    transportModel  Newtonian;
+    nu              nu [ 0 2 -1 0 0 0 0 ] 1.5e-05;
+    rho             rho [ 1 -3 0 0 0 0 0 ] 1.0;
+}
+
+sigma           sigma [ 1 0 -2 0 0 0 0 ] 0.073;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+interface
+{
+    isInterfaceMethod       alpha;        
+                                                // snGradAlpha: gradient of alpha is used
+                                                //              pos( average( mag(snGrad(alpha)) )*dX - tr )
+                                                //              this method is recomended since alpha smears out over time
+                                                //              control thickness with isInterfaceAddN
+                                                // alpha:       real value of alpha is used
+                                                //              pos(alpha1_ - tr) && pos((1-alpha1_) - tr)::q
+    isInterfaceThreshold    1e-2;             
+                                                // defines bandwith parameter of cells considered as interface cells
+                                                // should be around snGradAlpha-> 1e-2, alpha -> 1e-9
+    isInterfaceAddN         0;
+                                                // Manually thickens the interface stencil by N cells for a 
+                                                // smoother and wider interface stencil. 
+}
+
+reconstruct
+{
+	reconstructModel reconstructIsoSurface;
+                                                //Simple  - interFoam method 
+                                                //          no reconstruction of the interface
+                                                //          nHatv = gradAlpha/mag(gradAlpha)
+                                                //          no exact position of interface known
+                                                //IsoSurface - as used in Kunkelmann 2011 and Batzdorf 2015
+
+    calcSignedDistance      no;            
+                                                //up to now only usable for reconstructIsoSurface
+                                                //signed distance to the interface. > 0 in denser phase
+
+    distanceThreshold       2e-4;             
+                                                //only used in IsoSurface and if calcSignedDistance
+                                                //  calculate the distance to the interface up to the 
+                                                //  here defined distance
+
+    alphaInterpolationMethod inverseDistance; 
+                                                //only used in IsoSurface
+                                                //  inverseDistance: if interface is meshed unstructured
+                                                //  linearFit: more expensive, better results in unstructured meshes
+}
+
+contactLine
+{
+    cLVelocityModel         cLVelocitySimple; 
+                                                //Simple  - interFoam method 
+                                                //          takes the velocity of the cell point as cL velocity
+                                                //ViaCLPosition - calculates velocity via the position of the CL of the 
+                                                //                last and current time step. Requires an explicit
+                                                //                distance handling of CL like cLPositionIsoSurface
+                                                //                best results together with - no limiters
+                                                //                                           - reconstructIsoSurface 
+                                                //                                           - curvatureIsoSurface
+
+    //--------------------------------------------------------------------------------------------------------------
+
+    cLPositionModel         cLPositionNone;
+                                                //None        - the cL Poisition is not explicitly calculated
+                                                //IsoSurface  - cL Position necessary for "cLVelocityModel "cLVelocityViaCLPosition;
+                                                //              similar to reconstructIsoSurface, just for wall patches.
+                                                //              Using alpha interpolation to face points the contact line is
+                                                //              reconstructed. A signed distance field, cL points and the cL 
+                                                //              normal are calculated.
+
+    alphaInterpolationMethod  inverseDistance; 
+                                                //only used in IsoSurface
+                                                //  inverseDistance: if interface is meshed unstructured
+                                                //  linearFit: more expensive, better results in unstructured meshes 
+    pinning                 no;                
+                                                //pinning boundary by Linder2014, requires mixed contact angle patch 
+                                                //with hysteresis
+                                     
+    //--------------------------------------------------------------------------------------------------------------
+
+    cAngleModel             contactAngleACAP; //Mixed; 
+                                                //ACAP    - interFoam method 
+                                                //          casts the wall patch as alphaContactAngleFvPatchScalarField
+                                                //ACAMixed  - family of alphaContactAnglePatches derived from Mixed 
+                                                //            base class which is ncesessary for pinning         
+
+    //--------------------------------------------------------------------------------------------------------------
+
+ cAConvergenceEpsilon    0.01;             
+                                                //The correction loop matching cLPosition, cLVelocity and cAngle 
+                                                //if the cAngle of the current and last iteration differ less 
+                                                //than cAConvergenceEpsilon
+
+    cAUnderrelaxFactor      0.20;             
+                                                //theta is under-relaxed in the corrector loop
+                                                //thetaCurr = thetaNew*f + thetaOld*(1-f)
+                                                //improves convergence
+
+    nMaxCorrections           50;
+                                                //If contact angle depends on cLPosition and cLVelocity nMaxCorrections
+                                                //will be made to iteratively match the three values
+                                                //Since it's an unstable system, a high number will not help much here.
+                                                //Batzdorf 2015 suggests about 30 to 50 iterations
+
+    correctionModel         none;             
+                                                //counteracts the dependence of the apparent contact angle 
+                                                //to the mesh size as in Afkami 2009.
+                                                //derived of hydrodynamic theory -> for small Ca numbers only!
+                                                //none:         No correction is applied                              //TODO notRuntimeSelective
+                                                //ZhouAndSheng: Zhou and Sheng 1990, fast approximation only for 
+                                                //              liquid densityRatio > 0.8 and |cos(theta)| < 0.6 
+                                                //Voinov: Voinov 1976, for high density ratios and all contact angles  
+}
+
+curvature
+{
+    curvatureModel curvatureIsoSurface;
+                                                //Simple  - interFoam method 
+                                                //          k = -fvc::div( nHatfv_ & mesh().Sf() )
+                                                //IsoSurface - to use with reconstructIsoSurface
+                                                //             corrects nHat, smoothens k and distributes k
+
+    smoothSym               no;
+                                                //only used in IsoSurface                                             //notRuntimeSelective
+                                                //    no: spares symmetry attached cells from curvature smoothing
+                                                //    yes: smoothens symmetry planes anyway
+    smoothWall              no;             
+                                                //only used in IsoSurface                                             //notRuntimeSelective
+                                                //    no: spares wall attached cells from curvature smoothing
+                                                //    yes: smoothens wall planes anyway
+    preSmoothCycles         2;                  
+                                                //only used in Isosurface
+                                                //    curvature is deleted in all cells with interfaceDensity == 0
+                                                //    and smoothed in preSmooth-Cycles by averaging
+                                                //    suggested by Batzdorf and Kunkelmann: 2
+    postSmoothCycles        2;                  
+                                                //only used in Isosurface
+                                                //    after the preSmooth the curvature field is distributed on the isInterface stencil
+                                                //    and then smoothed again in postSmooth-Cycles by averaging
+                                                //    suggested by Batzdorf and Kunkelmann: 2
+}
+
+
+//--------------------------------------------------------------------------------------------------------------

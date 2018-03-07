@@ -1,0 +1,125 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh   dynamicRefineBalancedFvMesh;
+
+refinementControls
+{
+    enableRefinementControl  true;
+    
+    fields // must be scalarFields
+    (
+        //alpha (min max refineLevel)
+        alpha (0.01 0.99 2) // refine cells where alpha in [0.01:0.99] with maximal 2 refinement layers
+    );
+    
+    interface // must be a scalarField (only one dictionary!)
+    (
+        alpha // refine interface (found based on snGrad of alpha > 0.1) 
+        {
+            innerRefLayers 2; // describes how many cell layers inside phase alpha are to be refined
+            outerRefLayers 5; // describes how many cell layers outside phase alpha are to be refined
+            
+            // optional settings:
+            maxRefineLevel 4; // max refinement layers; Default: maxRefinement from dynamicRefineFvMeshCoeffs is used
+            // to get slower than 2:1 refinement; add #nAddLayers between each refinement level at the interface
+            nAddLayers 1; //Default: 0 
+        }
+    );
+    
+    gradients // must be scalars
+    (
+        // arguments as in 'fields'
+        // min/max values are based on mag(fvc::grad(volScalarField)) * cellVolume
+        T    (0.01 10 1)
+    );
+    
+    curls // must be vectors
+    (
+        // arguments as in 'fields'
+        // min/max values are based on mag(fvc::curl(volVectorField))
+        U   (0.5 1 2)
+    );
+    
+    regions
+    (
+        boxToCell
+        {
+            minLevel 1;
+            
+            box (-1 0.001 0.002)(1 0.005 0.003);
+        }
+        
+    );
+}
+
+dynamicRefineFvMeshCoeffs
+{
+    // Extra entries for balancing
+    enableBalancing true;
+    allowableImbalance 0.15;
+
+    // How often to refine
+    refineInterval  10;
+    
+    // Field to be refinement on (set it to 'internalRefinementField' to use the
+    // refinementControls dictionary entries above)
+    field           internalRefinementField;
+    
+    // Refine field inbetween lower..upper
+    lowerRefineLevel 0.5; // do not change
+    upperRefineLevel 3.5; // maxRefinement+0.5
+    
+    // If value < unrefineLevel unrefine
+    unrefineLevel   -0.5; // do not change
+    
+    // Have slower than 2:1 refinement
+    nBufferLayers   4;
+    
+    // Refine cells only up to maxRefinement levels
+    maxRefinement   3;
+    
+    // Stop refinement if maxCells reached
+    maxCells        200000;
+    
+    // Flux field and corresponding velocity field. Fluxes on changed
+    // faces get recalculated by interpolating the velocity. Use 'none'
+    // on surfaceScalarFields that do not need to be reinterpolated.
+    correctFluxes
+    (
+        (phi Urel)
+        (phiAbs U)
+        (phiAbs_0 U_0)
+        (nHatf none)
+        (rho*phi none)
+        (ghf none)
+    );
+
+    // List of non-flux surface<Type>Fields to be mapped
+    // only for new internal faces (AMR refine)
+    mapSurfaceFields
+    (
+        Uf
+        Uf_0
+    );
+    
+    // Write the refinement level as a volScalarField
+    dumpLevel       true;
+}
+
+
+// ************************************************************************* //

@@ -1,0 +1,25 @@
+diff --git a/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H b/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H
+index 40dfd16..a2698fb 100644
+--- a/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H
++++ b/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H
+@@ -70,7 +70,19 @@ void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
+     }
+ 
+     field.autoMap(mapper.surfaceMap());
+-
++    
++////////////////////////////////////////////////////////////////////////
++// Andera Montorfano, Politecnico de Milano. Thank you very much!
++// Daniel Deising fixed the idea :)
++
++    // MUST not change sign of vector fields!!!
++//    if (field.typeName == vectorField::null().typeName)       // bug by Andrea
++    if (std::is_same<Type, vector>::value) //vector::typeName)  // fixed by Daniel Deising
++    {
++       return;
++    } 
++////////////////////////////////////////////////////////////////////////
++   
+     // Flip the flux
+     const labelList flipFaces = mapper.surfaceMap().flipFaceFlux().toc();
+ 

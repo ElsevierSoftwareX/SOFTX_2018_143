@@ -84,16 +84,16 @@ doc/Doxygen/DTAGS
 /.cproject
 /.project
 
-testCases/*/[0-9]*
-testCases/*/processor*
-testCases/*/case.foam
-testCases/*/log.*
-testCases/*/constant/polyMesh/boundary
-testCases/*/constant/polyMesh/faces
-testCases/*/constant/polyMesh/neighbour
-testCases/*/constant/polyMesh/owner
-testCases/*/constant/polyMesh/points
-testCases/*/VTK*
+tutorials/[0-9]*
+tutorials/**/processor*
+tutorials/**/case.foam
+tutorials/**/log.*
+tutorials/**/constant/polyMesh/boundary
+tutorials/**/constant/polyMesh/faces
+tutorials/**/constant/polyMesh/neighbour
+tutorials/**/constant/polyMesh/owner
+tutorials/**/constant/polyMesh/points
+tutorials/**/VTK*
 
 
 

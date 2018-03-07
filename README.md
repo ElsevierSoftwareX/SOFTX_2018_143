@@ -5,21 +5,25 @@
 
 * Daniel Deising - Technical University Darmstadt
 * Daniel Rettenmaier - Technical University Darmstadt
-* T.G. Voskuilen ( https://github.com/tgvoskuilen/meshBalancing ) - Purdue University
-* Timothée Pourpoint - Purdue University
+* Yun Ouedraogo - Technical University Darmstadt
+        * T.G. Voskuilen ( https://github.com/tgvoskuilen/meshBalancing ) - Purdue University
+        * Timothée Pourpoint - Purdue University
+        * Andrea Montorfano - Politecnico de Milano
 
 
 ### How do I get set up? ###
+* Apply `git apply dontFlipSurfaceVectorFields.patch` in OpenFOAM core installation
 * `./Allwmake.sh`
-* The `dynamic*Mesh` classes are a copy of the current **OF-4-dev** branch.
+* The `dynamic*Mesh` classes are a copy of the **OF-dev** branch from commit 5bea9ad62fddaa28107f7dd6d96bdac9e57deaa5 of Aug 17 14:53:55 2017.
 * If some solver needs dynamic linking of the libraries, make sure to source the new ones in `$FOAM_USER_LIBBIN`
-* Use the `dynamicMeshDict` as provided in the folder `dynamicRefineBalancedFvMesh`.
-* Use the test cases as a basis for new ones.
+* Take note that the corresponding libraries are called `dynamic*Mesh-enh.so`
+* Use the `dynamicMeshDict` as provided in here `src/dynamicRefineBalancedFvMesh/dynamicMeshDict`.
 
 ### Who do I talk to? ###
 
 * Daniel Rettenmaier: rettenmaier@gsc.tu-darmstadt.de
 * Daniel Deising: deising@mma.tu-darmstadt.de
+* Yun Ouedraogo: ouedraogo@temf.tu-darmstadt.de 
 
 ***
 ### Utilities ###
