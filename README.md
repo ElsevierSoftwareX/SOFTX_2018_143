@@ -13,6 +13,7 @@ The dynamic refinement algorithm of OpenFOAM is enhanced by
     - face addressing, 
     - mapping of cell and boundary fields between refinement states
     - and flux flipping
+
 Load balancing is made possible by a sophisticated redistribution algorithm already implemented in OpenFOAM. The load balancing code of T.G. Voskuilen and was stabilized fixing bugs regarding
 
 * flux flipping of non flux fields
@@ -75,7 +76,7 @@ A domain with two cells is initialized using the utility `initSurfaceFields`. Ca
 
 ##### LoadBalancingSurfaceFieldFlip
 A domain with three cells is decomposed manually. processor0 with one and processor1 with two cells. The cell at processor0 gets refined which leads to an imbalance higher than the minimal threshold for load balancing. **During the rebalancing step all surfaceFields get mapped using the flipping mechanism** as it is only correct for fluxes. Signs of the surfaceFields are falsly changed at processor patches if they don't represent a flux.
-Code changes are were necessary in [`fvMeshDistribute/fvMeshDistributeTemplates.C`]((https://bitbucket.org/drettenmaier/amr_lb_publication/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-src/dynamicMesh/fvMeshDistribute/fvMeshDistributeTemplates.C), [`fvMeshSubset/fvMeshSubsetInterpolate.C`]((https://bitbucket.org/drettenmaier/amr_lb_publication/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-src/dynamicMesh/fvMeshSubset/fvMeshSubsetInterpolate.C) and [`src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H`](https://bitbucket.org/drettenmaier/amr_lb_publication/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-dontFlipSurfaceVectorFields.patch)
+Code changes are were necessary in [`fvMeshDistribute/fvMeshDistributeTemplates.C`](https://bitbucket.org/drettenmaier/amr_lb_publication/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-src/dynamicMesh/fvMeshDistribute/fvMeshDistributeTemplates.C), [`fvMeshSubset/fvMeshSubsetInterpolate.C`](https://bitbucket.org/drettenmaier/amr_lb_publication/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-src/dynamicMesh/fvMeshSubset/fvMeshSubsetInterpolate.C) and [`src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H`](https://bitbucket.org/drettenmaier/amr_lb_publication/commits/1cef6f9569fe7525b5b769c43c910ec50dbd6785?at=master#chg-dontFlipSurfaceVectorFields.patch)
 In some cases we still observe a flipping of `surfaceVectorFields` using the `decomposePar` method. The work-flow of initializing a surfaceVectorField and then decompose the domain is therefore not recommended.
 
 ##### damBreakAMR_LB
