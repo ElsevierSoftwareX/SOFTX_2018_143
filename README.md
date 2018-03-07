@@ -1,6 +1,10 @@
 
 # README #
 
+[TOC]
+
+* * *
+
 ### Value proposition
 Dynamic cell refinement reduces computational costs for problems that changes over time by adapting the cell size automatically to accuracy requirements. For cases that are calculated in parallel the load between processors might become imbalanced resulting in idle processor time. 
 
@@ -14,25 +18,29 @@ The dynamic refinement algorithm of OpenFOAM is enhanced by
     - mapping of cell and boundary fields between refinement states
     - and flux flipping
 
-Load balancing is made possible by a sophisticated redistribution algorithm already implemented in OpenFOAM. The load balancing code of T.G. Voskuilen and was stabilized fixing bugs regarding
+Load balancing is made possible by a sophisticated redistribution algorithm already implemented in OpenFOAM. The load balancing code of T.G. Voskuilen is used and stabilized fixing bugs regarding
 
 * flux flipping of non flux fields
 * and boundary mapping 
-load balancing is made available here exemplarily for, but not limited to, the interDyMFoam solver family. 
+Load balancing is made available here exemplarily for, but not limited to, the interDyMFoam solver family. 
 
-Two unit cases illustrate the main bug fixes and several tutorial cases show possible use cases in the area of multiphase flows of the dynamic refinement in combination with load balancing.
+Two unit cases illustrate the main bug fixes and several tutorial cases show possible use cases in the area of multiphase flows of dynamic mesh refinement in combination with load balancing.
+
+* * *
 
 ### Contributers ###
 
 * Daniel Rettenmaier - Technical University Darmstadt
 * Daniel Deising - Technical University Darmstadt
 * Yun Ouedraogo - Technical University Darmstadt
+* Holger Marschall - Technical University Darmstadt
 
     - T.G. Voskuilen ( https://github.com/tgvoskuilen/meshBalancing ) - Purdue University
-    - TimothÃ©e Pourpoint - Purdue University
+    - Timothée Pourpoint - Purdue University
     - Andrea Montorfano - Politecnico de Milano
     - 2D refinement guy XXX
 
+* * *
 
 ### How do I get set up? ###
 * Checkout the branch which fits your OpenFOAM installation
@@ -55,6 +63,7 @@ Two unit cases illustrate the main bug fixes and several tutorial cases show pos
 * Yun Ouedraogo: ouedraogo@temf.tu-darmstadt.de 
 
 ***
+
 ### Utilities ###
 ###### meshUpdater
 Updates the mesh calling `mesh.update()`. Depending on the selected mesh type in `dynamicMeshDict`, an adaptive mesh refinement and a load balancing step is performed.
@@ -65,6 +74,7 @@ An overwrite option is available `-overwrite`
 ###### initSurfaceFields
 A utility used for unit testcases which initializes a `surfaceScalarField mySurfaceScalarField;` and a `surfaceVectorField mySurfaceVectorField;` which are initialized with the distance to the domain origin.
 
+* * *
 
 ### Test Cases ###
 ##### surfaceFieldMapping
@@ -91,7 +101,8 @@ This issue is fixed exemplarily for the [alphaContactAngle](https://bitbucket.or
 
 
 ##### capillaryRisePlate2D
+XXX
 
 ##### capillaryRisePipe2D
-
+XXX
 
