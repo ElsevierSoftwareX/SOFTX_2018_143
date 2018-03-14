@@ -96,6 +96,8 @@ tutorials/**/constant/polyMesh/owner
 tutorials/**/constant/polyMesh/points
 tutorials/**/VTK*
 
+tutorials/**/0.[0-9]*
 
+**/myPersonalSettings
 
 # end-of-file

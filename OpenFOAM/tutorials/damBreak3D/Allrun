@@ -20,8 +20,9 @@ runApplication blockMesh
 # initialize field and set refinement repeatedly
 for count in {1..3}
 do
-    runApplication topoSet
-    runApplication subsetMesh -overwrite c0 -patch walls
+
+    topoSet
+    subsetMesh -overwrite c0 -patch walls
 
     setFields
     meshUpdater -overwrite
