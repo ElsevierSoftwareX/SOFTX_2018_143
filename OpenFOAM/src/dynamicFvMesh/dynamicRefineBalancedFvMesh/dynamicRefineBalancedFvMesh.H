@@ -105,7 +105,7 @@ private:
         volScalarField* isLevelPtr_;
         
         //-
-        HashTable< List<scalar> > fields_;
+        HashTable< dictionary > fields_;
         
         //-
         HashTable< List<scalar> > gradFields_;

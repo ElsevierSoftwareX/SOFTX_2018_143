@@ -33,7 +33,13 @@ refinementControls
 
     fields
     (
-        alpha.water (0.1 1.1 1)
+        alpha.water
+        {
+            minValue  0.1;
+            maxValue  1.1;
+            refineLevel 2;
+            nAddLayers  0;
+        }
     );
     
     gradients

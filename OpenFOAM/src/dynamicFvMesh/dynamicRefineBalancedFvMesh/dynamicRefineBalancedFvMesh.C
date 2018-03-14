@@ -117,9 +117,10 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
     forAll(fieldNames, i)
     {
         word fldName = fieldNames[i];
-        scalar minValue = fields_[fldName][0];
-        scalar maxValue = fields_[fldName][1];
-        label refineLevel = static_cast<label>(fields_[fldName][2]);
+
+        scalar minValue = readScalar(fields_[fldName].lookup("minValue"));
+        scalar maxValue = readScalar(fields_[fldName].lookup("maxValue"));
+        scalar refineLevel = readScalar(fields_[fldName].lookup("refineLevel"));
         
         const volScalarField& fld = this->lookupObject<volScalarField>(fldName);
         
@@ -131,6 +132,47 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
                 // increase targetLevel up to refineLevel 
                 // BUT: do not decrease if cell already marked for higher refinement level by previous criterion
                 targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
+            }
+        }
+        
+        //- AddLayer Keyword
+        scalar nAddLayers(0);
+        if (fields_[fldName].found("nAddLayers"))
+        {
+            nAddLayers = readScalar(fields_[fldName].lookup("nAddLayers"));
+        }
+
+/*
+        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField FieldName: " <<fldName <<endl;
+        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField minValue: " <<minValue <<endl;
+        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField maxValue: " <<maxValue <<endl;
+        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField refineLevel: " <<refineLevel <<endl;
+        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField addLayers: " <<nAddLayers <<endl;
+*/
+
+        if (nAddLayers > 0)
+        {
+            //- create a volField of the labelList targetLevel
+            volScalarField tLevel(intRefFld * 0.0);  
+            forAll(targetLevel, cellI)
+            {
+                tLevel[cellI] = targetLevel[cellI];         
+            }
+
+            // #nAddLayers cells per additional level
+            for(label j=0; j < nAddLayers; j++)
+            {
+                //- select the area with targetLevel==refineLevel
+                volScalarField finest = pos(tLevel - refineLevel + SMALL);
+                
+                //- add +1 to targetLevel on the enlarged stencil 
+                tLevel += pos( fvc::average(fvc::interpolate(finest) - SMALL)) - finest;
+            }
+
+            //- copy the new results onto the target labelList
+            forAll(targetLevel, cellI)
+            {
+                targetLevel[cellI] = tLevel[cellI];         
             }
         }
     }
@@ -466,7 +508,7 @@ void Foam::dynamicRefineBalancedFvMesh::readRefinementDict()
             // Read HashTable of field-refinement scalars
             if( refineControlDict.found("fields") )
             {
-                fields_ = HashTable< List<scalar> >
+                fields_ = HashTable< dictionary >
                 (
                     refineControlDict.lookup("fields")
                 );

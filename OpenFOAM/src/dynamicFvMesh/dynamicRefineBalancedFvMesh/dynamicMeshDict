@@ -24,7 +24,14 @@ refinementControls
     fields // must be scalarFields
     (
         //alpha (min max refineLevel)
-        alpha (0.01 0.99 2) // refine cells where alpha in [0.01:0.99] with maximal 2 refinement layers
+        // refine cells where alpha in [0.01:0.99] with maximal 2 refinement layers
+        alpha.water
+        {
+            minValue  0.01;
+            maxValue  0.99;
+            refineLevel 2;
+            nAddLayers  2; // add two cell layers at the refinement border
+        }
     );
     
     interface // must be a scalarField (only one dictionary!)
