@@ -85,6 +85,7 @@ doc/Doxygen/DTAGS
 /.cproject
 /.project
 
+
 tutorials/[0-9]*
 tutorials/**/processor*
 tutorials/**/case.foam
@@ -96,8 +97,7 @@ tutorials/**/constant/polyMesh/owner
 tutorials/**/constant/polyMesh/points
 tutorials/**/VTK*
 
-tutorials/**/0.[0-9]*
 
-**/myPersonalSettings
+qCases/damBreak3D/0.*
 
 # end-of-file
