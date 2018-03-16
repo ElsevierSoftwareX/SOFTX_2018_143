@@ -80,39 +80,62 @@ define(nz,  1)
   );
     
   edges ( );
-    
-  patches 
-  (
-	symmetry left 
-  ( 	
-		(p4 p7 p3 p0)
-	)
- 
-	patch bottom
-  (  
-		(p1 p5 p4 p0)
-	)
 
-	patch right
-  ( 	
-		(p1 p2 p6 p5)
-  )
+boundary
+(
+    left 
+    {
+        type symmetry;
+        faces
+        (   
+                (p4 p7 p3 p0)
+        );
+    }
 
-	patch top
-  ( 	
-		 (p3 p7 p6 p2)
-	)
+    bottom 
+    {
+        type patch;
+        faces
+        (   
+                (p1 p5 p4 p0)
+        );
+    }
 
-  symmetry front
-  (   
-     (p0 p1 p2 p3)
-  )
+    right 
+    {
+        type patch;
+        faces
+        (   
+            (p1 p2 p6 p5)
+        );
+    }
 
-  symmetry back
-  (   
-     (p6 p5 p4 p7)
-  )
+    top 
+    {
+        type patch;
+        faces
+        (   
+            (p3 p7 p6 p2)
+        );
+    }
 
+    front 
+    {
+        type empty;
+        faces
+        (   
+           (p0 p1 p2 p3)
+        );
+    }
+
+    back 
+    {
+        type empty;
+        faces
+        (   
+           (p6 p5 p4 p7)
+        );
+    }
 
   );
     

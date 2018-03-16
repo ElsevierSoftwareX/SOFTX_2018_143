@@ -78,28 +78,30 @@ convertToMeters 1;
     
   edges ( );
     
-boundary 
+
+boundary
 (
-    left
-    { 
+    left 
+    {
         type symmetry;
         faces
-        ( 	
-        	(4 7 3 0)
+        (   
+                (4 7 3 0)
         );
     }
 
-    bottom
-    { 
+    bottom 
+    {
         type patch;
         faces
         (   
-            (1 5 4 0)
+                (1 5 4 0)
         );
     }
 
-    right
-    { 
+    right 
+    {
+
         type patch;
         faces
         (   
@@ -107,8 +109,9 @@ boundary
         );
     }
 
-    top
-    { 
+
+    top 
+    {
         type patch;
         faces
         (   
@@ -116,24 +119,25 @@ boundary
         );
     }
 
-    front
-    { 
+    front 
+    {
         type empty;
         faces
         (   
-            (6 5 4 7)
+           (0 1 2 3)
         );
     }
 
-    back
-    { 
+    back 
+    {
         type empty;
         faces
         (   
-            (0 1 2 3)
+           (6 5 4 7)
         );
     }
 
-);
+  );
+
     
  mergePatchPairs ( );
