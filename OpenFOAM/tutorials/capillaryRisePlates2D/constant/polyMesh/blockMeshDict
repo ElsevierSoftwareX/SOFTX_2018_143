@@ -78,38 +78,61 @@ convertToMeters 1;
     
   edges ( );
     
-  patches 
-  (
-	symmetry left 
-  ( 	
-		(4 7 3 0)
-	)
- 
-	patch bottom
-  (  
-		(1 5 4 0)
-	)
+boundary
+(
+    left 
+    {
+        type symmetry;
+        faces
+        (   
+                (4 7 3 0)
+        );
+    }
 
-	patch right
-  ( 	
-		(1 2 6 5)
-  )
+    bottom 
+    {
+        type patch;
+        faces
+        (   
+                (1 5 4 0)
+        );
+    }
 
-	patch top
-  ( 	
-		 (3 7 6 2)
-	)
+    right 
+    {
+        type patch;
+        faces
+        (   
+            (1 2 6 5)
+        );
+    }
 
-  symmetry front
-  (   
-     (0 1 2 3)
-  )
+    top 
+    {
+        type patch;
+        faces
+        (   
+            (3 7 6 2)
+        );
+    }
 
-  symmetry back
-  (   
-     (6 5 4 7)
-  )
+    front 
+    {
+        type empty;
+        faces
+        (   
+           (0 1 2 3)
+        );
+    }
 
+    back 
+    {
+        type empty;
+        faces
+        (   
+           (6 5 4 7)
+        );
+    }
 
   );
     

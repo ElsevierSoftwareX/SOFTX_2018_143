@@ -49,12 +49,12 @@ boundaryField
 
     front
     {
-        type           symmetry;
+        type           empty;
     }
 
     back
     {
-        type           symmetry;
+        type           empty;
     }
 
 }
