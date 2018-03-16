@@ -36,7 +36,7 @@ refinementControls
     
     interface // must be a scalarField (only one dictionary!)
     (
-        alpha // refine interface (found based on snGrad of alpha > 0.1) 
+        alpha.water // refine interface (found based on snGrad of alpha > 0.1) 
         {
             innerRefLayers 2; // describes how many cell layers inside phase alpha are to be refined
             outerRefLayers 5; // describes how many cell layers outside phase alpha are to be refined
