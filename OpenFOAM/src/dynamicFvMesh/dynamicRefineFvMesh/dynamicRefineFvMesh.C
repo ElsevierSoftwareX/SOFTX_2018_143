@@ -668,7 +668,7 @@ Foam::dynamicRefineFvMesh::maxPointField(const scalarField& pFld) const
 
 
 Foam::scalarField
-Foam::dynamicRefineFvMesh::maxCellField(const volScalarField& vFld) const
+Foam::dynamicRefineFvMesh::minCellField(const volScalarField& vFld) const
 {
     scalarField pFld(nPoints(), -GREAT);
 
