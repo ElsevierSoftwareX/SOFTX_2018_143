@@ -152,7 +152,7 @@ protected:
             scalarField maxPointField(const scalarField&) const;
 
             //- Get point max of connected cell
-            scalarField minCellField(const volScalarField&) const;
+            scalarField maxCellField(const volScalarField&) const;
 
             scalarField cellToPoint(const scalarField& vFld) const;
 

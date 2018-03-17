@@ -2308,13 +2308,11 @@ Foam::labelList Foam::hexRef8::selectUnrefineElems
 (
     const scalar unrefineLevel,
     const PackedBoolList& markedCell,
-    const volScalarField& vFld
+    const scalarField& pFld
 ) const
 {
     // All points that can be unrefined
     const labelList splitPoints(getSplitElems());
-
-    const scalarField pFld(minCellField(vFld));
 
     DynamicList<label> newSplitPoints(splitPoints.size());
 

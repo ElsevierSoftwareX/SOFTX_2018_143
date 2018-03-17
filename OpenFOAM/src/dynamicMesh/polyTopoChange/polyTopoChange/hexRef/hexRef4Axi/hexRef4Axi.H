@@ -192,7 +192,7 @@ public:
             (
                 const scalar unrefineLevel,
                 const PackedBoolList& markedCell,
-                const volScalarField& vFld
+                const scalarField& vFld
             ) const;
 
             void calcFaceToSplitPoint

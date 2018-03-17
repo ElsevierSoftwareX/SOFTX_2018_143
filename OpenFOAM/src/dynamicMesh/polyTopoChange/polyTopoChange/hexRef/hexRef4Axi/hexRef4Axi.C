@@ -1896,13 +1896,11 @@ Foam::labelList Foam::hexRef4Axi::selectUnrefineElems
 (
     const scalar unrefineLevel,
     const PackedBoolList& markedCell,
-    const volScalarField& vFld
+    const scalarField& pFld
 ) const
 {
     // All points that can be unrefined
     const labelList splitEdges(getSplitElems());
-
-    const scalarField pFld(minCellField(vFld));
 
     DynamicList<label> newSplitEdges(splitEdges.size());
 

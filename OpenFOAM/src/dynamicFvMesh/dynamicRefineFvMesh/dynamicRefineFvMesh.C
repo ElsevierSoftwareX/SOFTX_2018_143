@@ -666,6 +666,23 @@ Foam::dynamicRefineFvMesh::maxPointField(const scalarField& pFld) const
     return vFld;
 }
 
+Foam::scalarField
+Foam::dynamicRefineFvMesh::maxCellField(const volScalarField& vFld) const
+{
+    scalarField pFld(nPoints(), -GREAT);
+
+    forAll(pointCells(), pointi)
+    {
+        const labelList& pCells = pointCells()[pointi];
+
+        forAll(pCells, i)
+        {
+            pFld[pointi] = max(pFld[pointi], vFld[pCells[i]]);
+        }
+    }
+    return pFld;
+}
+
 
 Foam::scalarField
 Foam::dynamicRefineFvMesh::minCellField(const volScalarField& vFld) const
@@ -1538,7 +1555,7 @@ bool Foam::dynamicRefineFvMesh::update()
                 (
                     unrefineLevel,
                     refineCell,
-                    vFld
+                    maxCellField(vFld)
                 )
             );
 

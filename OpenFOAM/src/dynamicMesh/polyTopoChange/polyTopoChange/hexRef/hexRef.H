@@ -597,8 +597,6 @@ public:
 
         // Unrefinement (undoing refinement, not arbitrary coarsening)
 
-            scalarField minCellField(const volScalarField& vFld) const;
-
             //- Return the mid elems in top-level split cells
             //  that can be unsplit.
             virtual labelList getSplitElems() const = 0;
@@ -626,7 +624,7 @@ public:
             (
                 const scalar unrefineLevel,
                 const PackedBoolList& markedCell,
-                const volScalarField& vFld
+                const scalarField& vFld
             ) const = 0;
 
             virtual void calcFaceToSplitPoint

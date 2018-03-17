@@ -3612,23 +3612,6 @@ bool Foam::hexRef::write() const
     return writeOk;
 }
 
-// Get min of connected cell
-Foam::scalarField
-Foam::hexRef::minCellField(const volScalarField& vFld) const
-{
-    scalarField pFld(mesh_.nPoints(), GREAT);
-
-    forAll(mesh_.pointCells(), pointi)
-    {
-        const labelList& pCells = mesh_.pointCells()[pointi];
-
-        forAll(pCells, i)
-        {
-            pFld[pointi] = min(pFld[pointi], vFld[pCells[i]]);
-        }
-    }
-    return pFld;
-}
 
 
 
