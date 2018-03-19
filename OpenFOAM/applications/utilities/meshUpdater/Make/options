@@ -7,7 +7,7 @@ EXE_INC = \
     -I$(AMR_LB_PROJECT)/src/dynamicFvMesh/lnInclude
 
 EXE_LIBS = \
-    $(FOAM_USER_LIBBIN)/libtwoPhaseProperties.so \
+    $(FOAM_USER_LIBBIN)/libmyTwoPhaseProperties.so \
     -lfiniteVolume \
     $(FOAM_USER_LIBBIN)/libdynamicMesh.so \
     -lmeshTools \

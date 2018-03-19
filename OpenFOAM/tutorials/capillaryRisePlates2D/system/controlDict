@@ -55,5 +55,6 @@ maxDeltaT       1;
 
 libs
 (
-   "libdynamicFvMesh.so"
+   "libdynamicFvMesh.so"		// All AMR and LB enhancements
+   "libmyTwoPhaseProperties.so" // fully specified mapping in myConstantAlphaContactAngle
 );

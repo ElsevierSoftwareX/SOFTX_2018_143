@@ -1,4 +1,4 @@
 alphaContactAngle/alphaContactAngleFvPatchScalarField.C
-constantAlphaContactAngle/constantAlphaContactAngleFvPatchScalarField.C
+constantAlphaContactAngle/myConstantAlphaContactAngleFvPatchScalarField.C
 
-LIB = $(FOAM_USER_LIBBIN)/libtwoPhaseProperties
+LIB = $(FOAM_USER_LIBBIN)/libmyTwoPhaseProperties
