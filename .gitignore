@@ -106,9 +106,9 @@ OpenFOAM/tutorials/**/constant/polyMesh/points
 OpenFOAM/tutorials/**/VTK*
 
 
-qCases/damBreak3D/0.*
+OpenFOAM/qCases/damBreak3D/0.*
 
-qCases/capillaryRisePlates2D/0.*
+OpenFOAM/qCases/capillaryRisePlates2D/[0-9]*
 OpenFOAM/qCases/capillaryRisePlates2D/processor*
 
 # end-of-file
