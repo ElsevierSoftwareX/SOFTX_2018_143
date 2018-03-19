@@ -683,7 +683,7 @@ Foam::dynamicRefineFvMesh::maxCellField(const volScalarField& vFld) const
     return pFld;
 }
 
-
+/*
 Foam::scalarField
 Foam::dynamicRefineFvMesh::minCellField(const volScalarField& vFld) const
 {
@@ -700,7 +700,7 @@ Foam::dynamicRefineFvMesh::minCellField(const volScalarField& vFld) const
     }
     return pFld;
 }
-
+*/
 
 // Simple (non-parallel) interpolation by averaging.
 Foam::scalarField
