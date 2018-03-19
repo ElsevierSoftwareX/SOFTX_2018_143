@@ -19,5 +19,13 @@ numberOfSubdomains 4;
 
 method          ptscotch; //clsutered //scotch
 
-
+constraints
+{
+    refinementHistory
+    {
+        //- Decompose cells such that all cell originating from single cell
+        //  end up on same processor
+        type    refinementHistory;
+    }
+}
 // ************************************************************************* //

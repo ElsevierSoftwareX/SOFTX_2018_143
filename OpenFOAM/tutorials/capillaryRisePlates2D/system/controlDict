@@ -53,3 +53,7 @@ maxAlphaCo      0.4;
 
 maxDeltaT       1;
 
+libs
+(
+   "libdynamicFvMesh.so"
+);
