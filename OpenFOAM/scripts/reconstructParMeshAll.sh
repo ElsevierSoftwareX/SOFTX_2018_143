@@ -60,6 +60,8 @@ function options()
 		reconstructParMesh $parMeshArg >/dev/null 2>&1; 
 
     	reconstructPar "$@" >/dev/null 2>&1;
+
+    	reconstructParLevel "$@" >/dev/null 2>&1;
     	f3=1;f0=0;
     	exit
 	fi
@@ -76,13 +78,15 @@ function reconstructTimeStep()
 	parMeshArg=`echo "$args" | sed 's/-fields[^)]*)//gi'`
 
 	f0=1;f3=0;
-	echo -n " reconstructParMesh $parMeshArg"
+		echo -n " reconstructParMesh $parMeshArg"
         reconstructParMesh $parMeshArg  >/dev/null 2>&1; 
 
         echo -n " reconstructPar  $args"
     #    reconstructPar "$@" >/dev/null 2>&1 
-        grep -q 'ERROR' <<< `reconstructPar "$@" 2>&1` && echo -e "\e[32m ERROR\033[0m"  || echo " done"
+        grep -q 'ERROR' <<< `reconstructPar "$@" 2>&1` && echo -n "\e[32m ERROR\033[0m"
 
+        echo  " reconstructParLevel  $args"
+        reconstructParLevel "$@" >/dev/null 2>&1;
     f3=1;f0=0;
 }
 

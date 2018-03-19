@@ -28,3 +28,12 @@ cd -
 cd applications/utilities/initSurfaceFields/
 wmake
 cd - 
+
+cd applications/utilities/decomposeParLevel/
+wmake
+cd - 
+
+cd applications/utilities/reconstructParLevel/
+wmake
+cd - 
+
