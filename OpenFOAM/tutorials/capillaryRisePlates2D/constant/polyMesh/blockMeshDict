@@ -78,7 +78,7 @@ convertToMeters 1;
     
   edges ( );
     
-
+    
 boundary
 (
     left 
@@ -101,14 +101,12 @@ boundary
 
     right 
     {
-
         type patch;
         faces
         (   
             (1 2 6 5)
         );
     }
-
 
     top 
     {
