@@ -23,7 +23,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.5;
+endTime         0.1;
 
 deltaT          1e-7;
 
@@ -56,5 +56,5 @@ maxDeltaT       1;
 libs
 (
    "libdynamicFvMesh.so"		// All AMR and LB enhancements
-   "libmyTwoPhaseProperties.so" // fully specified mapping in myConstantAlphaContactAngle
+   "libtwoPhaseProperties.so" // fully specified mapping in myConstantAlphaContactAngle
 );

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constantAlphaContactAngleFvPatchScalarField
+    Foam::myConstantAlphaContactAngleFvPatchScalarField
 
 Description
     A constant alphaContactAngle scalar boundary condition.
@@ -32,12 +32,12 @@ See also
     Foam::temperatureDependentAlphaContactAngleFvPatchScalarField
 
 SourceFiles
-    constantAlphaContactAngleFvPatchScalarField.C
+    myConstantAlphaContactAngleFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef constantAlphaContactAngleFvPatchScalarField_H
-#define constantAlphaContactAngleFvPatchScalarField_H
+#ifndef myConstantAlphaContactAngleFvPatchScalarField_H
+#define myConstantAlphaContactAngleFvPatchScalarField_H
 
 #include "alphaContactAngleFvPatchScalarField.H"
 
@@ -47,10 +47,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class constantAlphaContactAngleFvPatch Declaration
+                           Class myConstantAlphaContactAngleFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantAlphaContactAngleFvPatchScalarField
+class myConstantAlphaContactAngleFvPatchScalarField
 :
     public alphaContactAngleFvPatchScalarField
 {
@@ -69,14 +69,14 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        constantAlphaContactAngleFvPatchScalarField
+        myConstantAlphaContactAngleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        constantAlphaContactAngleFvPatchScalarField
+        myConstantAlphaContactAngleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -84,20 +84,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  constantAlphaContactAngleFvPatchScalarField
+        //  myConstantAlphaContactAngleFvPatchScalarField
         //  onto a new patch
-        constantAlphaContactAngleFvPatchScalarField
+        myConstantAlphaContactAngleFvPatchScalarField
         (
-            const constantAlphaContactAngleFvPatchScalarField&,
+            const myConstantAlphaContactAngleFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        constantAlphaContactAngleFvPatchScalarField
+        myConstantAlphaContactAngleFvPatchScalarField
         (
-            const constantAlphaContactAngleFvPatchScalarField&
+            const myConstantAlphaContactAngleFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -105,14 +105,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new constantAlphaContactAngleFvPatchScalarField(*this)
+                new myConstantAlphaContactAngleFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        constantAlphaContactAngleFvPatchScalarField
+        myConstantAlphaContactAngleFvPatchScalarField
         (
-            const constantAlphaContactAngleFvPatchScalarField&,
+            const myConstantAlphaContactAngleFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -124,7 +124,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new constantAlphaContactAngleFvPatchScalarField(*this, iF)
+                new myConstantAlphaContactAngleFvPatchScalarField(*this, iF)
             );
         }
 

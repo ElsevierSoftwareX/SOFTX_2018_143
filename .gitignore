@@ -86,18 +86,29 @@ doc/Doxygen/DTAGS
 /.project
 
 
-tutorials/[0-9]*
-tutorials/**/processor*
-tutorials/**/case.foam
-tutorials/**/log.*
-tutorials/**/constant/polyMesh/boundary
-tutorials/**/constant/polyMesh/faces
-tutorials/**/constant/polyMesh/neighbour
-tutorials/**/constant/polyMesh/owner
-tutorials/**/constant/polyMesh/points
-tutorials/**/VTK*
+**/constant/polyMesh/faces.gz
+**/constant/polyMesh/neighbour.gz
+**/constant/polyMesh/owner.gz
+**/constant/polyMesh/points.gz
+**/case.foam
+
+**/myPersonalSettings
+
+OpenFOAM/tutorials/**/[0-9]*
+OpenFOAM/tutorials/**/processor*
+OpenFOAM/tutorials/**/case.foam
+OpenFOAM/tutorials/**/log.*
+OpenFOAM/tutorials/**/constant/polyMesh/boundary
+OpenFOAM/tutorials/**/constant/polyMesh/faces
+OpenFOAM/tutorials/**/constant/polyMesh/neighbour
+OpenFOAM/tutorials/**/constant/polyMesh/owner
+OpenFOAM/tutorials/**/constant/polyMesh/points
+OpenFOAM/tutorials/**/VTK*
 
 
 qCases/damBreak3D/0.*
+
+qCases/capillaryRisePlates2D/0.*
+OpenFOAM/qCases/capillaryRisePlates2D/processor*
 
 # end-of-file

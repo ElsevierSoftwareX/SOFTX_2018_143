@@ -30,8 +30,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::constantAlphaContactAngleFvPatchScalarField::
-constantAlphaContactAngleFvPatchScalarField
+Foam::myConstantAlphaContactAngleFvPatchScalarField::
+myConstantAlphaContactAngleFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -42,8 +42,8 @@ constantAlphaContactAngleFvPatchScalarField
 {}
 
 
-Foam::constantAlphaContactAngleFvPatchScalarField::
-constantAlphaContactAngleFvPatchScalarField
+Foam::myConstantAlphaContactAngleFvPatchScalarField::
+myConstantAlphaContactAngleFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -57,10 +57,10 @@ constantAlphaContactAngleFvPatchScalarField
 }
 
 
-Foam::constantAlphaContactAngleFvPatchScalarField::
-constantAlphaContactAngleFvPatchScalarField
+Foam::myConstantAlphaContactAngleFvPatchScalarField::
+myConstantAlphaContactAngleFvPatchScalarField
 (
-    const constantAlphaContactAngleFvPatchScalarField& gcpsf,
+    const myConstantAlphaContactAngleFvPatchScalarField& gcpsf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -71,10 +71,10 @@ constantAlphaContactAngleFvPatchScalarField
 {}
 
 
-Foam::constantAlphaContactAngleFvPatchScalarField::
-constantAlphaContactAngleFvPatchScalarField
+Foam::myConstantAlphaContactAngleFvPatchScalarField::
+myConstantAlphaContactAngleFvPatchScalarField
 (
-    const constantAlphaContactAngleFvPatchScalarField& gcpsf
+    const myConstantAlphaContactAngleFvPatchScalarField& gcpsf
 )
 :
     alphaContactAngleFvPatchScalarField(gcpsf),
@@ -82,10 +82,10 @@ constantAlphaContactAngleFvPatchScalarField
 {}
 
 
-Foam::constantAlphaContactAngleFvPatchScalarField::
-constantAlphaContactAngleFvPatchScalarField
+Foam::myConstantAlphaContactAngleFvPatchScalarField::
+myConstantAlphaContactAngleFvPatchScalarField
 (
-    const constantAlphaContactAngleFvPatchScalarField& gcpsf,
+    const myConstantAlphaContactAngleFvPatchScalarField& gcpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -97,7 +97,7 @@ constantAlphaContactAngleFvPatchScalarField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
-Foam::constantAlphaContactAngleFvPatchScalarField::theta
+Foam::myConstantAlphaContactAngleFvPatchScalarField::theta
 (
     const fvPatchVectorField&,
     const fvsPatchVectorField&
@@ -107,7 +107,7 @@ Foam::constantAlphaContactAngleFvPatchScalarField::theta
 }
 
 
-void Foam::constantAlphaContactAngleFvPatchScalarField::write
+void Foam::myConstantAlphaContactAngleFvPatchScalarField::write
 (
     Ostream& os
 ) const
@@ -125,7 +125,7 @@ namespace Foam
     makePatchTypeField
     (
         fvPatchScalarField,
-        constantAlphaContactAngleFvPatchScalarField
+        myConstantAlphaContactAngleFvPatchScalarField
     );
 }
 
