@@ -281,7 +281,7 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
         }
 
         // assumed fld=0.5*(fldMax+fldMin) defines the interface
-        dimensionedScalar fldInterfaceValue(0.5*(max(fld)+min(fld)));
+        dimensionedScalar fldInterfaceValue(0.5*(gMax(fld)+gMin(fld)));
 
         //-DD: old implementation based on face interpolation
         //     which results in slower transport in diagonal direction
