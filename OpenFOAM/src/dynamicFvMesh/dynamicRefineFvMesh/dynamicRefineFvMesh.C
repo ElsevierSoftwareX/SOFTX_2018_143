@@ -753,6 +753,10 @@ void Foam::dynamicRefineFvMesh::selectRefineCandidates
     PackedBoolList& candidateCell
 ) const
 {
+////////////////////////////////////////////////////////////////////////
+// Batzdorf
+/* 
+    //-
     // Get error per cell. Is -1 (not to be refined) to >0 (to be refined,
     // higher more desirable to be refined).
     scalarField cellError
@@ -776,6 +780,16 @@ void Foam::dynamicRefineFvMesh::selectRefineCandidates
             candidateCell.set(celli, 1);
         }
     }
+*/
+    //+
+    forAll(vFld, cellI)
+    {
+        if ((vFld[cellI] >= lowerRefineLevel) && (vFld[cellI] <= upperRefineLevel))
+        {
+            candidateCell.set(cellI, 1);
+        }
+    }
+////////////////////////////////////////////////////////////////////////  
 }
 
 

@@ -143,14 +143,6 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
             nAddLayers = readScalar(fields_[fldName].lookup("nAddLayers"));
         }
 
-/*
-        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField FieldName: " <<fldName <<endl;
-        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField minValue: " <<minValue <<endl;
-        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField maxValue: " <<maxValue <<endl;
-        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField refineLevel: " <<refineLevel <<endl;
-        Info << "Foam::dynamicRefineBalancedFvMesh::updateRefinementField addLayers: " <<nAddLayers <<endl;
-*/
-
         if (nAddLayers > 0)
         {
             //- create a volField of the labelList targetLevel
@@ -283,89 +275,95 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
         // assumed fld=0.5*(fldMax+fldMin) defines the interface
         dimensionedScalar fldInterfaceValue(0.5*(gMax(fld)+gMin(fld)));
 
-        //-DD: old implementation based on face interpolation
-        //     which results in slower transport in diagonal direction
-        // add inner refinement layers
-        //for(label i=0; i < innerRefLayers; i++)
-        //{
-        //    isInterface += neg(- fvc::average(fvc::interpolate(isInterface)) * pos(fld - fldInterfaceValue));
-        //    isInterface = neg(- isInterface);
-        //}
-        //
-        // add outer refinement layers
-        //for(label i=0; i < outerRefLayers; i++)
-        //{
-        //    isInterface += neg(- fvc::average(fvc::interpolate(isInterface)) * pos(fldInterfaceValue - fld));
-        //    isInterface = neg(- isInterface);
-        //}
-        //
-        //forAll(isInterface, cellI)
-        //{
-        //    if (isInterface[cellI] > 0.5)
-        //    {
-        //        targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
-        //    }
-        //}
-
-        //-DD: new version using volPointInterpolation (direction independent buffer layer)
-        const volPointInterpolation& pInterp = volPointInterpolation::New(*this);
         const fvMesh& mesh = fld.mesh();
-
-        // add inner refinement layers
-        for(label i=0; i < innerRefLayers; i++)
+        if (mesh.nGeometricD() == 2)
         {
-            volScalarField markInner(isInterface*pos(fld - fldInterfaceValue));
-            pointScalarField markLayerP(pInterp.interpolate(markInner));
 
-            forAll(mesh.C(), cellI)
+            //-DD: old implementation based on face interpolation
+            //     which results in slower transport in diagonal direction
+            // add inner refinement layers
+            for(label i=0; i < innerRefLayers; i++)
             {
-                scalar sum = 0.;
-                label nPoints = 0;
-
-                forAll(mesh.cellPoints()[cellI], pointI)
-                {
-                    sum += markLayerP[mesh.cellPoints()[cellI][pointI]];
-                    nPoints++;
-                }
-                if (nPoints > 0)
-                {
-                    sum /= nPoints;
-                }
-                isInterface[cellI] += sum;
+               isInterface += neg(- fvc::average(fvc::interpolate(isInterface)) * pos(fld - fldInterfaceValue));
+               isInterface = neg(- isInterface);
             }
-        }
-        isInterface = pos(isInterface - SMALL);
-
-        // add outer refinement layers
-        for(label i=0; i < outerRefLayers; i++)
-        {
-            volScalarField markOuter(isInterface*pos(fldInterfaceValue - fld));
-            pointScalarField markLayerP(pInterp.interpolate(markOuter));
-
-            forAll(mesh.C(), cellI)
+            
+            // add outer refinement layers
+            for(label i=0; i < outerRefLayers; i++)
             {
-                scalar sum = 0.;
-                label nPoints = 0;
-
-                forAll(mesh.cellPoints()[cellI], pointI)
-                {
-                    sum += markLayerP[mesh.cellPoints()[cellI][pointI]];
-                    nPoints++;
-                }
-                if (nPoints > 0)
-                {
-                    sum /= nPoints;
-                }
-                isInterface[cellI] += sum;
+               isInterface += neg(- fvc::average(fvc::interpolate(isInterface)) * pos(fldInterfaceValue - fld));
+               isInterface = neg(- isInterface);
             }
-        }
-        isInterface = pos(isInterface - SMALL);
-
-        forAll(isInterface, cellI)
-        {
-            if (isInterface[cellI] > 0.5)
+            
+            forAll(isInterface, cellI)
             {
-                targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
+               if (isInterface[cellI] > 0.5)
+               {
+                   targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
+               }
+            }
+        } else {
+
+            //-DD: new version using volPointInterpolation (direction independent buffer layer)
+            const volPointInterpolation& pInterp = volPointInterpolation::New(*this);
+            //const fvMesh& mesh = fld.mesh();
+
+            // add inner refinement layers
+            for(label i=0; i < innerRefLayers; i++)
+            {
+                volScalarField markInner(isInterface*pos(fld - fldInterfaceValue));
+                pointScalarField markLayerP(pInterp.interpolate(markInner));
+
+                forAll(mesh.C(), cellI)
+                {
+                    scalar sum = 0.;
+                    label nPoints = 0;
+
+                    forAll(mesh.cellPoints()[cellI], pointI)
+                    {
+                        sum += markLayerP[mesh.cellPoints()[cellI][pointI]];
+                        nPoints++;
+                    }
+                    if (nPoints > 0)
+                    {
+                        sum /= nPoints;
+                    }
+                    isInterface[cellI] += sum;
+                }
+            }
+            isInterface = pos(isInterface - SMALL);
+
+            // add outer refinement layers
+            for(label i=0; i < outerRefLayers; i++)
+            {
+                volScalarField markOuter(isInterface*pos(fldInterfaceValue - fld));
+                pointScalarField markLayerP(pInterp.interpolate(markOuter));
+
+                forAll(mesh.C(), cellI)
+                {
+                    scalar sum = 0.;
+                    label nPoints = 0;
+
+                    forAll(mesh.cellPoints()[cellI], pointI)
+                    {
+                        sum += markLayerP[mesh.cellPoints()[cellI][pointI]];
+                        nPoints++;
+                    }
+                    if (nPoints > 0)
+                    {
+                        sum /= nPoints;
+                    }
+                    isInterface[cellI] += sum;
+                }
+            }
+            isInterface = pos(isInterface - SMALL);
+
+            forAll(isInterface, cellI)
+            {
+                if (isInterface[cellI] > 0.5)
+                {
+                    targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
+                }
             }
         }
 
@@ -460,9 +458,9 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
     // simply check, if targetLevel lower or higher cellLevel
     forAll (intRefFld.internalField(), cellI)
     {
-        intRefFld.primitiveFieldRef()[cellI] = targetLevel[cellI] - cellLevel[cellI];
+        intRefFld.primitiveFieldRef()[cellI] = targetLevel[cellI] - meshCutter()->cellLevel()[cellI];
         targetFld.primitiveFieldRef()[cellI] = targetLevel[cellI];
-        currFld.primitiveFieldRef()[cellI] = cellLevel[cellI];
+        currFld.primitiveFieldRef()[cellI] =  meshCutter()->cellLevel()[cellI];
     }
 
     intRefFld.correctBoundaryConditions();
