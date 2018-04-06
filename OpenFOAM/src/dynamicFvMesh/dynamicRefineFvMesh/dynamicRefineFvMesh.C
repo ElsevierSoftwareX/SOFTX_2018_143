@@ -1364,6 +1364,15 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         }
     }
 
+    // Unprotect cells that have a refinement history
+    const labelList& visibleCells = meshCutter_->history().visibleCells();
+    forAll(visibleCells, celli)
+    {
+        if (visibleCells[celli] >= 0)
+        {
+            protectedCell_.unset(celli);
+        }
+    }
     if (returnReduce(nProtected, sumOp<label>()) == 0)
     {
         protectedCell_.clear();
