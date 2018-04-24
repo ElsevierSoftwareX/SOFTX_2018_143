@@ -42,6 +42,18 @@ namespace Foam
 {
     defineTypeNameAndDebug(dynamicRefineFvMesh, 0);
     addToRunTimeSelectionTable(dynamicFvMesh, dynamicRefineFvMesh, IOobject);
+
+
+    // Helper class for accessing max cell level of faces accross processor patches
+    template<class Type>
+    class combineMaxOp
+    {
+        public:
+        void operator()(Type& x, const Type& y) const
+        {
+            x = max(x, y);
+        }
+    };
 }
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -1361,18 +1373,158 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
             // Unprotect prism cells on the axis
             protectedCell_ -= cellIsAxisPrism;
             nProtected -= nAxisPrims;
+
+
+
+            // YO
+            // Unprotect cells that have a refinement history
+            const labelList& visibleCells = meshCutter_->history().visibleCells();
+            forAll(visibleCells, celli)
+            {
+                if (visibleCells[celli] >= 0)
+                {
+                    if (protectedCell_[celli])
+                    {
+                        protectedCell_.unset(celli);
+                        nProtected--;
+                    }
+                }
+            }
+
+            // Look for former prisms cells on level 0. Since they do not have
+            // a refinement history, they will be incorrectly protected.
+            // In order to find former prisms, look for protectedCells with
+            // exactly 2 points on the axis. If the number of refined
+            // neighbours matches with the number of faces in excess of 5,
+            // the cell is (most probably) a former prism.
+
+            {
+                // First, look for a wedge polyPatch, in order to get the wedge
+                // plane normal and axis.
+                vector axis;
+                vector centreNormal;
+                bool foundWedge = false;
+
+                forAll(boundaryMesh(), patchi)
+                {
+                    if (isA<wedgePolyPatch>(boundaryMesh()[patchi]))
+                    {
+                        foundWedge = true;
+
+                        const wedgePolyPatch& wedgePatch =
+                            refCast<const wedgePolyPatch>
+                            (
+                                boundaryMesh()[patchi]
+                            );
+
+                        axis = wedgePatch.axis();
+                        centreNormal = wedgePatch.centreNormal();
+                        break;
+                    }
+                }
+
+                if (!foundWedge)
+                {
+                    FatalErrorInFunction
+                        << "Number of geometric dimensions and solution dimensions "
+                        << "correspond to an axisymmetric case, but no wedgePolyPatch "
+                        << " found in boundaryMesh." << nl
+                        << exit(FatalError);
+                }
+
+                // Get radial direction on the mesh
+                vector radialVector = axis ^ centreNormal;
+
+                // Translate as a component. Since wedge meshes should be constrained
+                // around one of the planes XY, XZ or YZ, we can directly get the
+                // distance to the axis
+
+                direction dir = 0;
+                scalar maxComp = mag(radialVector[0]);
+
+                if (mag(radialVector[1]) > maxComp)
+                {
+                    dir = 1;
+                    maxComp = mag(radialVector[1]);
+                }
+                if (mag(radialVector[2]) > maxComp)
+                {
+                    dir = 2;
+                }
+
+                // Use the level0Edge length to calculate a safety margin for
+                // detecting points on the axis.
+                // We should be able to rely on level0, since we only check
+                // unrefined cells.
+                scalar tolerance = meshCutter_->level0EdgeLength() * 1e-6;
+
+                const labelListList& cellPoints = primitiveMesh::cellPoints();
+
+                // Get max level across faces
+                labelList maxFaceLevel(nFaces());
+                const labelList& cellLevel = meshCutter_->cellLevel();
+
+                forAll(maxFaceLevel, facei)
+                {
+                    maxFaceLevel[facei] = cellLevel[faceOwner()[facei]];
+                }
+
+                forAll(faceNeighbour(), facei)
+                {
+                    maxFaceLevel[facei] = max(maxFaceLevel[facei], cellLevel[faceNeighbour()[facei]]);
+                }
+                syncTools::syncFaceList(*this, maxFaceLevel, combineMaxOp<label>());
+
+                forAll(protectedCell_, celli)
+                {
+                    if (protectedCell_[celli])
+                    {
+                        // Check if the cell has exactly 2 points on the axis
+                        label numPointsOnAxis = 0;
+                        const labelList& cPoints = cellPoints[celli];
+                        forAll(cPoints, pointi)
+                        {
+                            if (mag(points()[cPoints[pointi]][dir]) < tolerance)
+                            {
+                                numPointsOnAxis++;
+                            }
+                        }
+
+                        if (numPointsOnAxis == 2)
+                        {
+                            // Calculate number of higher level neighbour cells.
+                            // Use cellFaces instead of cellCells to deal with
+                            // processor patches.
+                            label thisCellLevel = cellLevel[celli];
+                            label numNeighboursWithHigherLevel = 0;
+
+                            const labelList& cellFaces = cells()[celli];
+                            forAll(cellFaces, cellFacei)
+                            {
+                                if (thisCellLevel < maxFaceLevel[cellFaces[cellFacei]])
+                                {
+                                    numNeighboursWithHigherLevel++;
+                                }
+                            }
+
+                            // If the cell was a neighbour to refined cells, then each
+                            // pair of refined neighbours introduces an additional face
+                            if (2*(cellFaces.size()-5) == numNeighboursWithHigherLevel)
+                            {
+                                protectedCell_.unset(celli);
+                                nProtected--;
+                            }
+                        }
+                    }
+                }
+            }
         }
+
+        //-YO
     }
 
-    // Unprotect cells that have a refinement history
-    const labelList& visibleCells = meshCutter_->history().visibleCells();
-    forAll(visibleCells, celli)
-    {
-        if (visibleCells[celli] >= 0)
-        {
-            protectedCell_.unset(celli);
-        }
-    }
+
+
     if (returnReduce(nProtected, sumOp<label>()) == 0)
     {
         protectedCell_.clear();
