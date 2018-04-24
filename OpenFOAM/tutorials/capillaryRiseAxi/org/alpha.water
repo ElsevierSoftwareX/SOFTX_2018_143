@@ -49,12 +49,12 @@ boundaryField
 
     front
     {
-        type           empty;
+        type           wedge;
     }
 
     back
     {
-        type           empty;
+        type           wedge;
     }
 
 }

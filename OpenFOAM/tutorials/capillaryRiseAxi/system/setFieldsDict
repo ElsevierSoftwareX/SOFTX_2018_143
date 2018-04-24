@@ -27,7 +27,7 @@ regions
     boxToCell
     {
         //box (0 0 0) (1 273.4375e-6 1);
-	box (0 0 0) (1 0.00375 1);
+	box (0 0 -1) (1 0.00375 1);
 
         fieldValues
         (
