@@ -98,9 +98,6 @@ void Foam::dynamicRefineBalancedFvMesh::updateRefinementField()
     // Set the internal refinement field to zero to start with
     intRefFld = dimensionedScalar("zero",dimless,0.0);
 
-    // Get the cell level field from dynamicRefineFvMesh
-    const labelList& cellLevel = meshCutter()->cellLevel();
-
     // Read the points at which refinement and unrefinement occur from the
     // dynamicMeshDict entries
     List<scalar> refinePoints = readRefinementPoints();

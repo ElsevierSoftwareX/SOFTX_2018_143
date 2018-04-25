@@ -1401,8 +1401,8 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
             {
                 // First, look for a wedge polyPatch, in order to get the wedge
                 // plane normal and axis.
-                vector axis;
-                vector centreNormal;
+                vector axis(0,0,0);
+                vector centreNormal(0,0,0);
                 bool foundWedge = false;
 
                 forAll(boundaryMesh(), patchi)
