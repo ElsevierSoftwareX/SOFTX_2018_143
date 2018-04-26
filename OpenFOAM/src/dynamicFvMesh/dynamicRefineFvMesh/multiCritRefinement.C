@@ -413,11 +413,12 @@ void Foam::multiCritRefinement::updateRefinementField()
             // assumed fld=0.5*(fldMax+fldMin) defines the interface
             dimensionedScalar fldInterfaceValue(0.5*(gMax(fld)+gMin(fld)));
 
-            const fvMesh& mesh = fld.mesh();
-            if (mesh.nGeometricD() == 2)
+            // Face-wise interplation for 2D meshes since point interpolation does not work
+            // on empty patches
+            if (mesh_.nGeometricD() == 2)
             {
 
-                //-DD: old implementation based on face interpolation
+                //-DD: implementation based on face interpolation
                 //     which results in slower transport in diagonal direction
                 // add inner refinement layers
                 for(label i=0; i < innerRefLayers; i++)
@@ -442,7 +443,7 @@ void Foam::multiCritRefinement::updateRefinementField()
                 }
             } else {
 
-                //-DD: new version using volPointInterpolation (direction independent buffer layer)
+                //-DD: version using volPointInterpolation (direction independent buffer layer)
                 const volPointInterpolation& pInterp = volPointInterpolation::New(mesh_);
                 //const fvMesh& mesh = fld.mesh();
 
@@ -452,14 +453,14 @@ void Foam::multiCritRefinement::updateRefinementField()
                     volScalarField markInner(isInterface*pos(fld - fldInterfaceValue));
                     pointScalarField markLayerP(pInterp.interpolate(markInner));
 
-                    forAll(mesh.C(), cellI)
+                    forAll(mesh_.C(), cellI)
                     {
                         scalar sum = 0.;
                         label nPoints = 0;
 
-                        forAll(mesh.cellPoints()[cellI], pointI)
+                        forAll(mesh_.cellPoints()[cellI], pointI)
                         {
-                            sum += markLayerP[mesh.cellPoints()[cellI][pointI]];
+                            sum += markLayerP[mesh_.cellPoints()[cellI][pointI]];
                             nPoints++;
                         }
                         if (nPoints > 0)
@@ -477,14 +478,14 @@ void Foam::multiCritRefinement::updateRefinementField()
                     volScalarField markOuter(isInterface*pos(fldInterfaceValue - fld));
                     pointScalarField markLayerP(pInterp.interpolate(markOuter));
 
-                    forAll(mesh.C(), cellI)
+                    forAll(mesh_.C(), cellI)
                     {
                         scalar sum = 0.;
                         label nPoints = 0;
 
-                        forAll(mesh.cellPoints()[cellI], pointI)
+                        forAll(mesh_.cellPoints()[cellI], pointI)
                         {
-                            sum += markLayerP[mesh.cellPoints()[cellI][pointI]];
+                            sum += markLayerP[mesh_.cellPoints()[cellI][pointI]];
                             nPoints++;
                         }
                         if (nPoints > 0)
@@ -529,6 +530,7 @@ void Foam::multiCritRefinement::updateRefinementField()
                    }
                }
             }
+
         }
     }
 
