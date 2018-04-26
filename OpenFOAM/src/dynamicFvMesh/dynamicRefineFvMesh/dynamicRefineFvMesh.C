@@ -1171,7 +1171,8 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     meshCutter_(hexRef::New(*this)),
     dumpLevel_(false),
     nRefinementIterations_(0),
-    protectedCell_(nCells(), 0)
+    protectedCell_(nCells(), 0),
+    multiCritRefinement_(Foam::multiCritRefinement(meshCutter_->cellLevel(), *this))
 {
     // Read static part of dictionary
     readDict();
@@ -1183,6 +1184,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     // This is currently any cell which does not have 8 anchor points or
     // uses any face which does not have 4 anchor points.
     // Note: do not use cellPoint addressing
+    // Note: Axisymmetric meshes are handled differently!
 
     // Count number of points <= cellLevel
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1608,6 +1610,15 @@ bool Foam::dynamicRefineFvMesh::update()
 
     if (time().timeIndex() > 0 && time().timeIndex() % refineInterval == 0)
     {
+
+        {
+            // reads multiple refinement criteria if subdict multiCritRefinementControls
+            // in dynamicMeshDict is present or else does nothing
+            // calculates the multiCritRefinementField which needs to be set as field in
+            // dynamicRefineFvMeshCoeffs.field multiCritRefinementField;
+            multiCritRefinement_.updateRefinementField();
+        }
+
         label maxCells = readLabel(refineDict.lookup("maxCells"));
 
         if (maxCells <= 0)

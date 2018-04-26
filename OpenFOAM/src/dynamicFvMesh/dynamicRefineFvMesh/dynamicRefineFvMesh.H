@@ -25,26 +25,33 @@ Class
     Foam::dynamicRefineFvMesh
 
 Description
-    A fvMesh with built-in refinement.
+    A fvMesh with built-in multi-criteria refinement.
 
     Determines which cells to refine/unrefine and does all in update().
 
 
-        // How often to refine
-        refineInterval  1;
-        // Field to be refinement on
-        field           alpha.water;
-        // Refine field inbetween lower..upper
-        lowerRefineLevel 0.001;
+    dynamicRefineFvMeshCoeffs
+    {    
+        refineInterval  1;              // How often to refine
+
+        field           alpha.water;    // Field to be refinement on
+                                        // use multiCritRefinementField together 
+                                        // with multiCritRefinementControls
+
+        lowerRefineLevel 0.001;         // Refine field inbetween lower..upper
         upperRefineLevel 0.999;
-        // If value < unrefineLevel (default=GREAT) unrefine
-        //unrefineLevel   10;
-        // Have slower than 2:1 refinement
-        nBufferLayers   1;
-        // Refine cells only up to maxRefinement levels
-        maxRefinement   2;
-        // Stop refinement if maxCells reached
-        maxCells        200000;
+
+        
+        // unrefineLevel   10;          // If value < unrefineLevel 
+                                        // (default=GREAT) unrefine
+
+        nBufferLayers   1;              // Have slower than 2:1 refinement
+
+        maxRefinement   2;              // Refine cells only up to maxRefinement 
+                                        // levels
+
+        maxCells        200000;         // Stop refinement if maxCells reached
+
         // Flux field and corresponding velocity field. Fluxes on changed
         // faces get recalculated by interpolating the velocity. Use 'none'
         // on surfaceScalarFields that do not need to be reinterpolated, use
@@ -52,21 +59,21 @@ Description
         correctFluxes
         (
             (phi none)  //NaN)   //none)
-            (nHatf none)   //none)
-            (rho*phi none)   //none)
+            (nHatf none)         //none)
+            (rho*phi none)       //none)
             (ghf none)  //NaN)   //none)
         );
 
-        // List of non-flux surface<Type>Fields to be mapped
         // only for new internal faces (AMR refine)
-        mapSurfaceFields
-        (
+        mapSurfaceFields_               // List of non-flux surface<Type>Fields 
+        (                               // to be mapped
             Uf
             Uf_0
         );
 
-        // Write the refinement level as a volScalarField
-        dumpLevel       true;
+        dumpLevel       true;            // Write the refinement level as a 
+                                         // volScalarField
+    }
 
 
 SourceFiles
@@ -81,6 +88,8 @@ SourceFiles
 #include "hexRef.H"
 #include "PackedBoolList.H"
 #include "Switch.H"
+
+#include "multiCritRefinement.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,6 +123,9 @@ protected:
 
         //- Protected cells (usually since not hexes)
         PackedBoolList protectedCell_;
+
+        //- handles the multi criterion refinment logic
+        multiCritRefinement multiCritRefinement_;
 
 
     // Protected Member Functions

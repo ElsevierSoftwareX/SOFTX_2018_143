@@ -36,8 +36,7 @@ Authors
     All rights reserved.
 
 Description
-    A fvMesh with built-in multi-criterion refinement
-    and run-time load balancing.
+    A fvMesh with run-time load balancing.
 
     You may refer to this software as :
     //- full bibliographic data to be provided
@@ -47,7 +46,7 @@ Description
     
     Method Development and Intellectual Property :
         T.G. Voskuilen (Purdue University)
-        Timothée Pourpoint <timothee@purdue.edu> (Purdue University
+        Timothée Pourpoint <timothee@purdue.edu> (Purdue University)
         Daniel Rettenmaier <rettenmaier@gsc.tu-darmstadt.de>
         Daniel Deising <deising@mma.tu-darmstadt.de>
         Holger Marschall <marschall@csi.tu-darmstadt.de>
@@ -78,9 +77,6 @@ Description
 #include "decompositionMethod.H"
 #include "fvMeshDistribute.H"
 #include "mapDistributePolyMesh.H"
-#include "HashTable.H"
-#include "topoSetSource.H"
-#include "cellSet.H"
 #include "PtrDictionary.H"
 #include "dictionaryEntry.H"
 
@@ -99,37 +95,7 @@ class dynamicRefineBalancedFvMesh
 {
 
 private:
-        //-
-        volScalarField* internalRefinementFieldPtr_;
-        volScalarField* targetLevelPtr_;
-        volScalarField* isLevelPtr_;
 
-        //-
-        HashTable< dictionary > fields_;
-        
-        //-
-        HashTable< List<scalar> > gradFields_;
-
-        //-
-        HashTable< List<scalar> > curlFields_;
-
-        //-
-        HashTable< dictionary > interface_;
-
-        //-
-        PtrList<entry> refinedRegions_;
-
-        //-
-        Switch enableRefinementControl_;
-
-        //-
-        void updateRefinementField();
-
-        //-
-        void readRefinementDict();
-
-        //-
-        List<scalar> readRefinementPoints();
 
         //- Disallow default bitwise copy construct
         dynamicRefineBalancedFvMesh(const dynamicRefineBalancedFvMesh&);
@@ -139,10 +105,7 @@ private:
 
         //-
         label topParentID(label p);
-
-        //-
-        label nBufferLayers_;
-
+        
         //-
         bool rebalance_;
 

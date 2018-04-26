@@ -17,9 +17,9 @@ FoamFile
 
 dynamicFvMesh   dynamicRefineFvMesh;
 
-refinementControls
+multiCritRefinementControls
 {
-    enableRefinementControl  true;
+    enableMultiCritRefinementControl  true;
     
     fields // must be scalarFields
     ();
