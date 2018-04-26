@@ -17,9 +17,9 @@ FoamFile
 
 dynamicFvMesh   dynamicRefineBalancedFvMesh;
 
-refinementControls
+multiCritRefinementControls
 {
-    enableRefinementControl  true;
+    enableMultiCritRefinementControl  true;
     
     interface
     (
@@ -71,7 +71,7 @@ dynamicRefineFvMeshCoeffs
     refineInterval  5;
 
     // Field to be refinement on
-    field           internalRefinementField;
+    field           multiCritRefinementField;
 
     // Refine field inbetween lower..upper
     lowerRefineLevel 0.5;
