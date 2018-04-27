@@ -1106,8 +1106,15 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
                     //- simple averaging of all neighbour master-faces
                     forAll(faceOwner, iFace)
                     {
-                        if (faceMap[faceOwner[iFace]] != -1)
+                        //- faces on empty patches are not counted
+                        label facePatchId = boundaryMesh().whichPatch(faceOwner[iFace]);
+                        bool isNonEmptyBoundFace = !( this->boundaryMesh()[0].start() < faceOwner[iFace]  
+                                                 && isA<emptyPolyPatch>(boundaryMesh()[facePatchId]));
+
+                        //- is master face and not on empty boundary
+                        if ( faceMap[faceOwner[iFace]] != -1 && isNonEmptyBoundFace)
                         {
+
                             tmpValue += tsFld[faceOwner[iFace]];
                             magFld += mag(tsFld[faceOwner[iFace]]);
                             counter++;
@@ -1116,7 +1123,13 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
 
                     forAll(faceNeighbour, iFace)
                     {
-                        if (faceMap[faceNeighbour[iFace]] != -1)
+                        //- faces on empty patches are not counted
+                        label facePatchId = boundaryMesh().whichPatch(faceNeighbour[iFace]);
+                        bool isNonEmptyBoundFace = !( this->boundaryMesh()[0].start() < faceNeighbour[iFace]  
+                                                 && isA<emptyPolyPatch>(boundaryMesh()[facePatchId]));
+
+                        //- is master face and not on empty boundary
+                        if ( faceMap[faceNeighbour[iFace]] != -1 && isNonEmptyBoundFace)
                         {
 
                             tmpValue = tmpValue + tsFld[faceNeighbour[iFace]];
