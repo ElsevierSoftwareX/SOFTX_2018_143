@@ -250,12 +250,23 @@ void Foam::multiCritRefinement::updateRefinementField()
 
         forAll(fieldNames, i)
         {
-            word fldName = fieldNames[i];
-
-            scalar minValue = readScalar(fields_[fldName].lookup("minValue"));
-            scalar maxValue = readScalar(fields_[fldName].lookup("maxValue"));
-            scalar refineLevel = readScalar(fields_[fldName].lookup("refineLevel"));
             
+            word fldEntry = fieldNames[i];
+
+            scalar minValue = readScalar(fields_[fldEntry].lookup("minValue"));
+            scalar maxValue = readScalar(fields_[fldEntry].lookup("maxValue"));
+            scalar refineLevel = readScalar(fields_[fldEntry].lookup("refineLevel"));
+
+            //- allow different criteria applied on one field, using different hash keys.
+            word fldName= "";
+            if (fields_[fldEntry].found("fieldName"))
+            {
+                fldName = word(fields_[fldEntry].lookup("fieldName"));
+            } else {
+                fldName = fldEntry;
+            }
+
+            //- get a handle of the field
             const volScalarField& fld = mesh_.lookupObject<volScalarField>(fldName);
             
             // Limit the value of refFld based on its max level
@@ -271,9 +282,9 @@ void Foam::multiCritRefinement::updateRefinementField()
             
             //- AddLayer Keyword
             scalar nAddLayers(0);
-            if (fields_[fldName].found("nAddLayers"))
+            if (fields_[fldEntry].found("nAddLayers"))
             {
-                nAddLayers = readScalar(fields_[fldName].lookup("nAddLayers"));
+                nAddLayers = readScalar(fields_[fldEntry].lookup("nAddLayers"));
             }
 
             if (nAddLayers > 0)
