@@ -28,6 +28,34 @@ Application
 Description
     Initializes surfaceFields to test mapping based on face centre position vector
 
+Authors
+    Daniel Rettenmaier <rettenmaier@gsc.tu-darmstadt.de>
+    Daniel Deising <deising@mma.tu-darmstadt.de>
+    All rights reserved.
+
+Description
+    A fvMesh with run-time load balancing.
+
+    You may refer to this software as :
+    //- full bibliographic data to be provided
+
+    This code has been developed by :
+        Daniel Rettenmaier (main developer).
+    
+    Method Development and Intellectual Property:
+        Daniel Rettenmaier <rettenmaier@gsc.tu-darmstadt.de>
+        Daniel Deising <deising@mma.tu-darmstadt.de>
+        Holger Marschall <marschall@csi.tu-darmstadt.de>
+        Dieter Bothe <bothe@csi.tu-darmstadt.de>
+        Cameron Tropea <ctropea@sla.tu-darmstadt.de>
+
+        Mathematical Modeling and Analysis
+        Institute for Fluid Mechanics and Aerodynamics
+        Center of Smart Interfaces
+        Technische Universitaet Darmstadt
+       
+    If you use this software for your scientific work or your publications,
+    please don't forget to acknowledge explicitly the use of it.
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"

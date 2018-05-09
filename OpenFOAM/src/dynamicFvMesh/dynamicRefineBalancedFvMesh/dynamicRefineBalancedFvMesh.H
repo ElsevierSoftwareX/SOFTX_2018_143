@@ -38,7 +38,7 @@ Authors
 Description
     A fvMesh with run-time load balancing.
 
-    You may refer to this software as :
+    You may refer to this software as:
     //- full bibliographic data to be provided
 
     This code has been developed by :
@@ -53,8 +53,7 @@ Description
         Dieter Bothe <bothe@csi.tu-darmstadt.de>
         Cameron Tropea <ctropea@sla.tu-darmstadt.de>
 
-        School of Aeronautics and Astronautics
-        Purdue University
+        School of Aeronautics and Astronautics Purdue University
         Mathematical Modeling and Analysis
         Institute for Fluid Mechanics and Aerodynamics
         Center of Smart Interfaces

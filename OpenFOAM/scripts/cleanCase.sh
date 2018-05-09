@@ -1,6 +1,8 @@
 #!/bin/sh
 # Cleanup case
 
+# Author: Daniel Rettenmaier
+
 #remove logFiles
 rm -rf log*
 

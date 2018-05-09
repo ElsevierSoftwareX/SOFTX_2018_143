@@ -56,6 +56,11 @@ Description
 SourceFiles
     alphaContactAngleFvPatchScalarField.C
 
+
+Author: 
+    File adapted in 2018 by:
+    Daniel Rettenmaier <rettenmaier@gsc.tu-darmstadt.de>
+        + Boundary patch mapping during mesh update
 \*---------------------------------------------------------------------------*/
 
 #ifndef alphaContactAngleFvPatchScalarField_H

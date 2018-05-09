@@ -79,6 +79,14 @@ Description
 SourceFiles
     dynamicRefineFvMesh.C
 
+Authors:
+    File adapted in 2018 by: 
+    Daniel Rettenmaier <rettenmaier@tu-darmstadt.de>
+    Daniel Deising <deising@mma.tu-darmstadt.de>
+    Changes: 
+        + Flux Mapping on refined internal faces
+        + Multiple refinement criteria
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef dynamicRefineFvMesh_H

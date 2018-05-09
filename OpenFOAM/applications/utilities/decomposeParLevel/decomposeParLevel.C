@@ -29,7 +29,7 @@ SourceFiles
     decomposeParLevel.C
 
 Authors
-    Christian Kunkelmann and Stefan Batzdorf
+    Christian Kunkelmann and Stefan Batzdorf 2015
     Institute of Technical Thermodynamics
     Technische Universität Darmstadt
 

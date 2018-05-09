@@ -1,4 +1,5 @@
 #!/bin/sh
+# Author: Daniel Rettenmaier 2018
 # Creates a case.foam file for paraview
 
 touch case.foam

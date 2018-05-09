@@ -1,5 +1,5 @@
 #!/bin/sh
-# Author: Rettenmaier Deising
+# Author: Daniel Rettenmaier, Daniel Deising
 
 # Initialize AMR_LB_PROJECT variable, necessary to compile libraries
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
