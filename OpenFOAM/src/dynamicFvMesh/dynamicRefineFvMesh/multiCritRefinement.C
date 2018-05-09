@@ -78,7 +78,7 @@ bool Foam::multiCritRefinement::readMultiCritRefinementDict()
             // Read HashTable of gradient-refinement scalars
             if( multiCritRefinementControls.found("gradients") )
             {
-                gradFields_ = HashTable< List<scalar> >
+                gradFields_ = HashTable< dictionary >
                 (
                     multiCritRefinementControls.lookup("gradients")
                 );
@@ -87,7 +87,7 @@ bool Foam::multiCritRefinement::readMultiCritRefinementDict()
             // Read HashTable of curl-refinement vectors
             if( multiCritRefinementControls.found("curls") )
             {
-                curlFields_ = HashTable< List<scalar> >
+                curlFields_ = HashTable< dictionary >
                 (
                     multiCritRefinementControls.lookup("curls")
                 );
@@ -123,6 +123,101 @@ bool Foam::multiCritRefinement::readMultiCritRefinementDict()
 }
 
 
+void Foam::multiCritRefinement::applyCritEntries(word critType, dictionary critDict)
+{
+
+
+    scalar minValue = readScalar(critDict.lookup("minValue"));
+    scalar maxValue = readScalar(critDict.lookup("maxValue"));
+    scalar refineLevel = readScalar(critDict.lookup("refineLevel"));
+
+    //- allow different criteria applied on one field, using different hash keys.
+    word fldName= "";
+    if (critDict.found("fieldName"))
+    {
+        fldName = word(critDict.lookup("fieldName"));
+    } else {
+        fldName = critDict.dictName();
+    }
+
+    Field<scalar> refFld(mesh_.nCells(), 0.0);
+    
+    if (critType == "field")
+    {
+        //- get a handle of the field
+        const volScalarField& fld = mesh_.lookupObject<volScalarField>(fldName);
+
+        refFld = fld;
+    }
+
+    if (critType == "grad")
+    {
+        //- get a handle of the field
+        const volVectorField& fld = mesh_.lookupObject<volVectorField>(fldName);
+
+        Field<scalar> cubeRtV = Foam::pow(mesh_.V(),1.0/3.0);
+
+        refFld = mag(fvc::grad(fld)) * cubeRtV;
+    }
+
+    if (critType == "curl")
+    {
+        //- get a handle of the field
+        const volVectorField& fld = mesh_.lookupObject<volVectorField>(fldName);
+
+        refFld = mag(fvc::curl(fld));
+    }
+
+    // Limit the value of refFld based on its max level
+    forAll(refFld, cellI)
+    {
+
+        if ((refFld[cellI] >= minValue) && (refFld[cellI] <= maxValue))
+        {
+            // increase targetLevel up to refineLevel
+            // BUT: do not decrease if cell already marked for higher refinement level by previous criterion
+            targetLevel_[cellI] = max(targetLevel_[cellI], refineLevel);
+        }
+    } 
+
+    //- AddLayer Keyword
+    scalar nAddLayers(0);
+    if (critDict.found("nAddLayers"))
+    {
+        nAddLayers = readScalar(critDict.lookup("nAddLayers"));
+    }
+
+    if (nAddLayers > 0)
+    {
+        //- create a volField of the labelList targetLevel
+            // Set the internal refinement field to zero to start with
+        volScalarField& tmp = *multiCritRefinementFieldPtr_;
+        tmp = dimensionedScalar("zero",dimless,0.0);
+        volScalarField tLevel(tmp * 0.0);
+        forAll(targetLevel_, cellI)
+        {
+            tLevel[cellI] = targetLevel_[cellI];
+        }
+
+        // #nAddLayers cells per additional level
+        for(label j=0; j < nAddLayers; j++)
+        {
+            //- select the area with targetLevel==refineLevel
+            volScalarField finest = pos(tLevel - refineLevel + SMALL);
+
+            //- add +1 to targetLevel on the enlarged stencil
+            tLevel += pos( fvc::average(fvc::interpolate(finest) - SMALL)) - finest;
+        }
+
+        //- copy the new results onto the target labelList
+        forAll(targetLevel_, cellI)
+        {
+            targetLevel_[cellI] = tLevel[cellI];
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::multiCritRefinement::multiCritRefinement(
@@ -134,6 +229,7 @@ Foam::multiCritRefinement::multiCritRefinement(
     mesh_(mesh),
     multiCritRefinementFieldPtr_(NULL),
     targetLevelPtr_(NULL),
+    targetLevel_(mesh.nCells(),0),
     isLevelPtr_(NULL),
     fields_(),
     gradFields_(),
@@ -239,7 +335,7 @@ void Foam::multiCritRefinement::updateRefinementField()
     labelList markRefineCells (mesh_.nCells(), 0);
 
     // init list for target refinement level per cell
-    labelList targetLevel (mesh_.nCells(), 0);
+    targetLevel_ = markRefineCells;
 
     Field<scalar> refFld(mesh_.nCells(),0.0);
 
@@ -253,93 +349,21 @@ void Foam::multiCritRefinement::updateRefinementField()
             
             word fldEntry = fieldNames[i];
 
-            scalar minValue = readScalar(fields_[fldEntry].lookup("minValue"));
-            scalar maxValue = readScalar(fields_[fldEntry].lookup("maxValue"));
-            scalar refineLevel = readScalar(fields_[fldEntry].lookup("refineLevel"));
-
-            //- allow different criteria applied on one field, using different hash keys.
-            word fldName= "";
-            if (fields_[fldEntry].found("fieldName"))
-            {
-                fldName = word(fields_[fldEntry].lookup("fieldName"));
-            } else {
-                fldName = fldEntry;
-            }
-
-            //- get a handle of the field
-            const volScalarField& fld = mesh_.lookupObject<volScalarField>(fldName);
-            
-            // Limit the value of refFld based on its max level
-            forAll(fld, cellI)
-            {
-                if ((fld[cellI] >= minValue) && (fld[cellI] <= maxValue))
-                {
-                    // increase targetLevel up to refineLevel
-                    // BUT: do not decrease if cell already marked for higher refinement level by previous criterion
-                    targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
-                }
-            }
-            
-            //- AddLayer Keyword
-            scalar nAddLayers(0);
-            if (fields_[fldEntry].found("nAddLayers"))
-            {
-                nAddLayers = readScalar(fields_[fldEntry].lookup("nAddLayers"));
-            }
-
-            if (nAddLayers > 0)
-            {
-                //- create a volField of the labelList targetLevel
-                volScalarField tLevel(intRefFld * 0.0);
-                forAll(targetLevel, cellI)
-                {
-                    tLevel[cellI] = targetLevel[cellI];
-                }
-
-                // #nAddLayers cells per additional level
-                for(label j=0; j < nAddLayers; j++)
-                {
-                    //- select the area with targetLevel==refineLevel
-                    volScalarField finest = pos(tLevel - refineLevel + SMALL);
-
-                    //- add +1 to targetLevel on the enlarged stencil
-                    tLevel += pos( fvc::average(fvc::interpolate(finest) - SMALL)) - finest;
-                }
-
-                //- copy the new results onto the target labelList
-                forAll(targetLevel, cellI)
-                {
-                    targetLevel[cellI] = tLevel[cellI];
-                }
-            }
+            //- read criteria dict entries and calculate target level
+            applyCritEntries("field", fields_[fldEntry]);            
         }
     }
 
     // Then gradients
     {
         List<word> gradFieldNames = gradFields_.toc();
-
-        Field<scalar> cubeRtV = Foam::pow(mesh_.V(),1.0/3.0);
-
+        
         forAll(gradFieldNames, i)
         {
-            word fldName = gradFieldNames[i];
-            scalar minValue = gradFields_[fldName][0];
-            scalar maxValue = gradFields_[fldName][1];
-            label refineLevel = static_cast<label>(gradFields_[fldName][2]);
+             word fldEntry = gradFieldNames[i];
 
-            const volScalarField& fld = mesh_.lookupObject<volScalarField>(fldName);
-
-            refFld = mag(fvc::grad(fld)) * cubeRtV;
-
-            // Limit the value of refFld based on its max level
-            forAll(refFld, cellI)
-            {
-                if ((refFld[cellI] >= minValue) && (refFld[cellI] <= maxValue))
-                {
-                    targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
-                }
-            }
+            //- read criteria dict entries and calculate target level
+            applyCritEntries("grad", gradFields_[fldEntry]);
         }
     }
 
@@ -349,27 +373,14 @@ void Foam::multiCritRefinement::updateRefinementField()
 
         forAll(curlFieldNames, i)
         {
-            word fldName = curlFieldNames[i];
-            scalar minValue = curlFields_[fldName][0];
-            scalar maxValue = curlFields_[fldName][1];
-            label refineLevel = static_cast<label>(curlFields_[fldName][2]);
+            word fldEntry = curlFieldNames[i];
 
-            const volVectorField& fld = mesh_.lookupObject<volVectorField>(fldName);
-
-            refFld = mag(fvc::curl(fld));
-
-            // Limit the value of refFld based on its max level
-            forAll(refFld, cellI)
-            {
-                if ((refFld[cellI] >= minValue) && (refFld[cellI] <= maxValue))
-                {
-                    targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
-                }
-            }
+            //- read criteria dict entries and calculate target level
+            applyCritEntries("curl", curlFields_[fldEntry]);        
         }
     }
 
-    // Finally at the interface (assumed to be always the maximum refinement level)
+    // Then at the interface (assumed to be always the maximum refinement level)
     {
         List<word> interfaceRefineField = interface_.toc();
         forAll(interfaceRefineField, i)
@@ -449,7 +460,7 @@ void Foam::multiCritRefinement::updateRefinementField()
                 {
                    if (isInterface[cellI] > 0.5)
                    {
-                       targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
+                       targetLevel_[cellI] = max(targetLevel_[cellI], refineLevel);
                    }
                 }
             } else {
@@ -512,7 +523,7 @@ void Foam::multiCritRefinement::updateRefinementField()
                 {
                     if (isInterface[cellI] > 0.5)
                     {
-                        targetLevel[cellI] = max(targetLevel[cellI], refineLevel);
+                        targetLevel_[cellI] = max(targetLevel_[cellI], refineLevel);
                     }
                 }
             }
@@ -536,7 +547,7 @@ void Foam::multiCritRefinement::updateRefinementField()
                    {
                        if (isInterface[cellI] == 1.0)
                        {
-                           targetLevel[cellI] = max(targetLevel[cellI], (refineLevel - i));
+                           targetLevel_[cellI] = max(targetLevel_[cellI], (refineLevel - i));
                        }
                    }
                }
@@ -545,7 +556,7 @@ void Foam::multiCritRefinement::updateRefinementField()
         }
     }
 
-    // regions (force the mesh to stay refined near key features)
+    //- Finally geometric regions (force the mesh to stay refined near key features)
     {
         forAll(refinedRegions_, regionI)
         {
@@ -575,7 +586,7 @@ void Foam::multiCritRefinement::updateRefinementField()
             {
                 const label& cellI = cells[i];
 
-                targetLevel[cellI] = max(targetLevel[cellI], minLevel);
+                targetLevel_[cellI] = max(targetLevel_[cellI], minLevel);
             }
         }
     }
@@ -586,11 +597,11 @@ void Foam::multiCritRefinement::updateRefinementField()
 
         for (label currLayer=globalMaxRefLevel; currLayer>=1; currLayer--)
         {
-            forAll (targetLevel, cellI)
+            forAll (targetLevel_, cellI)
             {
-                if (targetLevel[cellI] >= currLayer)
+                if (targetLevel_[cellI] >= currLayer)
                 {
-                    blockedLevel[cellI] = targetLevel[cellI];
+                    blockedLevel[cellI] = targetLevel_[cellI];
                 }
             }
 
@@ -604,7 +615,7 @@ void Foam::multiCritRefinement::updateRefinementField()
             {
                 blockLev[cellI] = blockedLevel[cellI];
             }
-            targetLevel = max(targetLevel, blockLev);
+            targetLevel_ = max(targetLevel_, blockLev);
         }
     }
 
@@ -612,8 +623,8 @@ void Foam::multiCritRefinement::updateRefinementField()
     // simply check, if targetLevel lower or higher cellLevel
     forAll (intRefFld.internalField(), cellI)
     {
-        intRefFld.primitiveFieldRef()[cellI] = targetLevel[cellI] - cellLevel_[cellI];
-        targetFld.primitiveFieldRef()[cellI] = targetLevel[cellI];
+        intRefFld.primitiveFieldRef()[cellI] = targetLevel_[cellI] - cellLevel_[cellI];
+        targetFld.primitiveFieldRef()[cellI] = targetLevel_[cellI];
         currFld.primitiveFieldRef()[cellI] =  cellLevel_[cellI];
     }
 

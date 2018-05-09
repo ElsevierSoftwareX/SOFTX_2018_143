@@ -70,7 +70,23 @@ multiCritRefinementControls
     (
         // arguments as in 'fields'
         // min/max values are based on mag(fvc::grad(volScalarField)) * cellVolume
-        T    (0.01 10 1)
+        O2_1
+        {
+            fielName O2;   //default: dictName -> 02_1
+            minValue 1.5;
+            maxValue 3.0;
+            refineLevel 1;
+            nAddLayers 0;  //default: 0
+        }
+
+        O2_2
+        {
+            fielName O2;
+            minValue 1.75;
+            maxValue 2.5;
+            refineLevel 2;
+            nAddLayers 0;  //default: 0
+        }
     );
     
     curls // must be vectors
@@ -78,6 +94,12 @@ multiCritRefinementControls
         // arguments as in 'fields'
         // min/max values are based on mag(fvc::curl(volVectorField))
         U   (0.5 1 2)
+        { 
+            minValue 0.5;
+            maxValue 1.0;
+            refineLevel 2;
+            nAddLayers 0;  //default: 0
+        }
     );
     
     regions

@@ -120,6 +120,8 @@ private:
         //- target refinement level combining all criteria
         volScalarField* targetLevelPtr_;
 
+        labelList targetLevel_;
+
         //- current refinement level
         volScalarField* isLevelPtr_;
 
@@ -130,11 +132,11 @@ private:
         
         //- list of scalar fields of which the |gradient| serves as refinement criteria
         //  minValue <= mag(grad(field)) <= maxValue
-        HashTable< List<scalar> > gradFields_;
+        HashTable< dictionary > gradFields_;
 
         //- list of fields of which its curl is used as refinement criteria
         //  minValue <= mag(curl(field)) <= maxValue
-        HashTable< List<scalar> > curlFields_;
+        HashTable< dictionary > curlFields_;
 
         //- inner and outer regions of an interface ( 0.1 < grad(alpha) ) are set
         //  to the global maxRefineLevel (in most cases you want exactly that)
@@ -152,6 +154,11 @@ private:
 
         //- reads and loads all "multiCritRefinementControl" - information
         bool readMultiCritRefinementDict();
+
+        //- calculates target level for the criteria "field", "gradient" and "curl"
+        //  evaluates dict entries:
+        //      fieldName, minValue, maxValue, refineLevel, nAddLayers
+        void applyCritEntries(word critType, dictionary critDict);
 
         //- Disallow default bitwise assignment
         void operator=(const multiCritRefinement&);
