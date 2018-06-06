@@ -38,8 +38,6 @@ writeFormat     binary;
 
 writePrecision  7;
 
-writeCompression compressed;
-
 timeFormat      general;
 
 timePrecision   7;

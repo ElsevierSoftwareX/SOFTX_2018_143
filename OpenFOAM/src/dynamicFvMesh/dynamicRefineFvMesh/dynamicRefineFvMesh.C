@@ -1806,7 +1806,7 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        dynamicFvMesh::writeObject(fmt, ver, cmp)
+        dynamicFvMesh::writeObjects(fmt, ver, cmp)
      && meshCutter_->write()
     );
 
