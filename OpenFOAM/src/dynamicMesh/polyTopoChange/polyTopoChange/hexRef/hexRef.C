@@ -3597,16 +3597,16 @@ const Foam::cellShapeList& Foam::hexRef::cellShapes() const
 
 
 // Write refinement to polyMesh directory.
-bool Foam::hexRef::write() const
+bool Foam::hexRef::write(const bool valid) const
 {
     bool writeOk =
-        cellLevel_.write()
-     && pointLevel_.write()
-     && level0Edge_.write();
+        cellLevel_.write(valid)
+     && pointLevel_.write(valid)
+     && level0Edge_.write(valid);
 
     if (history_.active())
     {
-        writeOk = writeOk && history_.write();
+        writeOk = writeOk && history_.write(valid);
     }
 
     return writeOk;

@@ -153,7 +153,7 @@ void Foam::multiCritRefinement::applyCritEntries(word critType, dictionary critD
     if (critType == "grad")
     {
         //- get a handle of the field
-        const volVectorField& fld = mesh_.lookupObject<volVectorField>(fldName);
+        const volScalarField& fld = mesh_.lookupObject<volScalarField>(fldName);
 
         Field<scalar> cubeRtV = Foam::pow(mesh_.V(),1.0/3.0);
 
@@ -350,7 +350,7 @@ void Foam::multiCritRefinement::updateRefinementField()
             word fldEntry = fieldNames[i];
 
             //- read criteria dict entries and calculate target level
-            applyCritEntries("field", fields_[fldEntry]);            
+            applyCritEntries("fields", fields_[fldEntry]);            
         }
     }
 
