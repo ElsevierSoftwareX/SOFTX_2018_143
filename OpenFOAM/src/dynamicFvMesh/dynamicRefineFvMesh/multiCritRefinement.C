@@ -123,9 +123,8 @@ bool Foam::multiCritRefinement::readMultiCritRefinementDict()
 }
 
 
-void Foam::multiCritRefinement::applyCritEntries(word critType, dictionary critDict)
+void Foam::multiCritRefinement::applyCritEntries(word critType, dictionary critDict, word critName)
 {
-
 
     scalar minValue = readScalar(critDict.lookup("minValue"));
     scalar maxValue = readScalar(critDict.lookup("maxValue"));
@@ -137,11 +136,11 @@ void Foam::multiCritRefinement::applyCritEntries(word critType, dictionary critD
     {
         fldName = word(critDict.lookup("fieldName"));
     } else {
-        fldName = critDict.dictName();
+        fldName = critName;
     }
 
     Field<scalar> refFld(mesh_.nCells(), 0.0);
-    
+
     if (critType == "field")
     {
         //- get a handle of the field
@@ -322,7 +321,7 @@ void Foam::multiCritRefinement::updateRefinementField()
     );
     scalar globalMaxRefLevel = readScalar(refineDict.lookup("maxRefinement"));
 
-    Info<< "Calculating internal refinement field" << endl;
+    Info<< "Calculating multiCritRefinement field" << endl;
 
     volScalarField& intRefFld = *multiCritRefinementFieldPtr_;
     volScalarField& targetFld = *targetLevelPtr_;
@@ -350,7 +349,7 @@ void Foam::multiCritRefinement::updateRefinementField()
             word fldEntry = fieldNames[i];
 
             //- read criteria dict entries and calculate target level
-            applyCritEntries("fields", fields_[fldEntry]);            
+            applyCritEntries("field", fields_[fldEntry], fldEntry);            
         }
     }
 
@@ -363,7 +362,7 @@ void Foam::multiCritRefinement::updateRefinementField()
              word fldEntry = gradFieldNames[i];
 
             //- read criteria dict entries and calculate target level
-            applyCritEntries("grad", gradFields_[fldEntry]);
+            applyCritEntries("grad", gradFields_[fldEntry], fldEntry);
         }
     }
 
@@ -376,7 +375,7 @@ void Foam::multiCritRefinement::updateRefinementField()
             word fldEntry = curlFieldNames[i];
 
             //- read criteria dict entries and calculate target level
-            applyCritEntries("curl", curlFields_[fldEntry]);        
+            applyCritEntries("curl", curlFields_[fldEntry], fldEntry);        
         }
     }
 
