@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     );
 
     //- Check if refinementHistory exists
-    if (historyHeader.headerOk())
+    if (historyHeader.typeHeaderOk<refinementHistory>())
     {
         refinementHistory history (historyHeader);
 
