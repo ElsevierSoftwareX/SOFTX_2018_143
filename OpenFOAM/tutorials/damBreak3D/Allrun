@@ -18,20 +18,26 @@ runApplication blockMesh
 #runApplication subsetMesh -overwrite c0 -patch walls
 
 # initialize field and set refinement repeatedly
+echo "TopoSet"
+topoSet >> log.topoSet
+
+echo "subsetMesh"
+subsetMesh -overwrite c0 -patch walls >> log.topoSet
+
+# initialize field and set refinement repeatedly
 for count in {1..3}
 do
 
-    topoSet
-    subsetMesh -overwrite c0 -patch walls
+	echo "setFields"
+	setFields >> log.topoSet
 
-    setFields
-    meshUpdater -overwrite
+	echo "meshUpdater"    
+	meshUpdater -overwrite #>> log.meshUpdater
 done
-
-runApplication setFields
 
 # decompose with constraint refinementHistory
 runApplication decomposePar
+runApplication decomposeParLevel
 
 # run the solver
 echo "run interDymFoam on 6 procs"
