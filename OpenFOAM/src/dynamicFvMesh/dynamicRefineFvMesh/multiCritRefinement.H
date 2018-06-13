@@ -158,7 +158,7 @@ private:
         //- calculates target level for the criteria "field", "gradient" and "curl"
         //  evaluates dict entries:
         //      fieldName, minValue, maxValue, refineLevel, nAddLayers
-        void applyCritEntries(word critType, dictionary critDict);
+        void applyCritEntries(word critType, dictionary critDict, word critName);
 
         //- Disallow default bitwise assignment
         void operator=(const multiCritRefinement&);
