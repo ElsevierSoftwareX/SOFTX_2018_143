@@ -41,7 +41,11 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
     {
         IOobject rio(io);
         rio.rename("cellLevel");
-        bool haveFile = returnReduce(rio.headerOk(), orOp<bool>());
+        bool haveFile = returnReduce
+        (
+            rio.typeHeaderOk<labelIOList>(),
+            orOp<bool>()
+        );
         if (haveFile)
         {
             Info<< "Reading hexRef data : " << rio.name() << endl;
@@ -51,7 +55,11 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
     {
         IOobject rio(io);
         rio.rename("pointLevel");
-        bool haveFile = returnReduce(rio.headerOk(), orOp<bool>());
+        bool haveFile = returnReduce
+        (
+            rio.typeHeaderOk<labelIOList>(),
+            orOp<bool>()
+        );
         if (haveFile)
         {
             Info<< "Reading hexRef data : " << rio.name() << endl;
@@ -61,7 +69,11 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
     {
         IOobject rio(io);
         rio.rename("level0Edge");
-        bool haveFile = returnReduce(rio.headerOk(), orOp<bool>());
+        bool haveFile = returnReduce
+        (
+            rio.typeHeaderOk<uniformDimensionedScalarField>(),
+            orOp<bool>()
+        );
         if (haveFile)
         {
             Info<< "Reading hexRef data : " << rio.name() << endl;
@@ -71,7 +83,11 @@ Foam::hexRef8Data::hexRef8Data(const IOobject& io)
     {
         IOobject rio(io);
         rio.rename("refinementHistory");
-        bool haveFile = returnReduce(rio.headerOk(), orOp<bool>());
+        bool haveFile = returnReduce
+        (
+            rio.typeHeaderOk<refinementHistory>(),
+            orOp<bool>()
+        );
         if (haveFile)
         {
             Info<< "Reading hexRef data : " << rio.name() << endl;

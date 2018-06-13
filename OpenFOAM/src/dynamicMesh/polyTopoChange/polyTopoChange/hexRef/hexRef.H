@@ -649,7 +649,7 @@ public:
             void setInstance(const fileName& inst);
 
             //- Force writing refinement+history to polyMesh directory.
-            bool write() const;
+            bool write(const bool valid) const;
 
 };
 

@@ -8,6 +8,7 @@ EXE_INC = \
 LIB_LIBS = \
     -ltriSurface \
     -lmeshTools \
+    -ldynamicMesh \
     $(FOAM_USER_LIBBIN)/libdynamicMesh.so \
     -lfiniteVolume \
     -ldecompositionMethods \
