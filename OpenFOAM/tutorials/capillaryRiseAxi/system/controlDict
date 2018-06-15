@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     interDyMFoam;
+application     interFoam;
 
 startFrom       latestTime;
 
@@ -38,7 +38,7 @@ writeFormat     binary;
 
 writePrecision  7;
 
-writeCompression compressed;
+writeCompression uncompressed;
 
 timeFormat      general;
 
@@ -58,3 +58,4 @@ libs
    "libdynamicFvMesh.so"		// All AMR and LB enhancements
    "libtwoPhaseProperties.so" // fully specified mapping in myConstantAlphaContactAngle
 );
+

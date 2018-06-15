@@ -26,7 +26,7 @@ done
 runApplication decomposePar
 
 # run the solver
-echo "run interDymFoam on 4 procs"
-mpirun -np 4 interDyMFoam -parallel > log.interDyMFoam
+echo "run interFoam on 4 procs"
+mpirun -np 4 interFoam -parallel > log.interFoam
 
 #------------------------------------------------------------------------------

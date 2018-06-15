@@ -40,7 +40,7 @@ runApplication decomposePar
 runApplication decomposeParLevel
 
 # run the solver
-echo "run interDymFoam on 6 procs"
-mpirun -np 6 interDyMFoam -parallel > log.interDyMFoam
+echo "run interFoam on 6 procs"
+mpirun -np 6 interFoam -parallel > log.interFoam
 
 #------------------------------------------------------------------------------
