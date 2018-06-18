@@ -5,7 +5,7 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 #clean case
-sh cleanCase.sh
+cleanCase.sh
 
 # restore 0
 cp -r org/ 0
@@ -25,6 +25,16 @@ done
 # decompose with constraint refinementHistory
 runApplication decomposePar
 decomposeParLevel
+
+# Make constant/polyMesh folders
+for fold in $(ls -d processor*)
+do
+    mkdir $fold/constant
+    cp -r $fold/0/polyMesh $fold/constant
+done
+
+# Make .foam file
+touch "${PWD##*/}.foam"
 
 #run the solver
 echo "run interDyMFoam on 4 procs"
