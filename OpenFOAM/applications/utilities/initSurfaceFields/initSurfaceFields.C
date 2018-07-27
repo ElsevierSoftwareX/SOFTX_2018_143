@@ -33,9 +33,6 @@ Authors
     Daniel Deising <deising@mma.tu-darmstadt.de>
     All rights reserved.
 
-Description
-    A fvMesh with run-time load balancing.
-
     You may refer to this software as :
     //- full bibliographic data to be provided
 
