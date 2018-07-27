@@ -136,7 +136,14 @@ do
 	do
 		count=$(expr $count + 1);
 		echo -e "Reconstruct: $timeStep   \t$count/${#reconstrList[@]}"
+
+		sed -i "/startFrom/c\startFrom       startTime;" system/controlDict 
+		sed -i "/startTime /c\startTime      $timeStep ;" system/controlDict 
+		
 		reconstructTimeStep -time $timeStep "${@}"
+
+		sed -i "/startFrom/c\startFrom       latestTime;" system/controlDict 
+		sed -i "/startTime /c\startTime      0;" system/controlDict 
 	done
 
 	sleep 1.5
