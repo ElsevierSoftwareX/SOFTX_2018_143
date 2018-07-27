@@ -13,7 +13,6 @@ The dynamic refinement algorithm of OpenFOAM is enhanced by
 * adding very flexible refinement based on multiple criteria 
 * and additional to the 3D a 2D and 2.5D refinement
 * fixing severe bugs regarding 
-* 
     - face addressing, 
     - mapping of cell and boundary fields between refinement states
     - and flux flipping
@@ -22,21 +21,22 @@ Load balancing is made possible by a sophisticated redistribution algorithm alre
 
 * flux flipping of non flux fields
 * and boundary mapping 
+
 Load balancing is used in the testcases exemplarily for, but not limited to, the interDyMFoam solver. 
 
 Two unit cases illustrate the main bug fixes and several tutorial cases show possible use cases in the area of multiphase flows of dynamic mesh refinement in combination with load balancing.
 
 * * *
 
-### Contributers ###
+### Contributors ###
 
 * Daniel Rettenmaier - Technical University Darmstadt
 * Daniel Deising - Technical University Darmstadt
 * Yun Ouedraogo - Technical University Darmstadt
 * Holger Marschall - Technical University Darmstadt
-
+* Other (indirect) contributors
     - T.G. Voskuilen ([meshBalancing](https://github.com/tgvoskuilen/meshBalancing)) - Purdue University (Dynamic load balancing in OpenFOAM-2.3.x)
-    - Timothée Pourpoint - Purdue Universit (Dynamic load balancing in OpenFOAM-2.3.x)  
+    - Timothee Pourpoint - Purdue Universit (Dynamic load balancing in OpenFOAM-2.3.x)  
     - Ahmad Baniabedalruhman - Michigan Technological University ([2D refinement](http://faculty.yu.edu.jo/ahmad_a/Lists/Other%20Academic%20Activities/AllItems.aspx))
     - Stefan Batzdorf - Technical University Darmstadt ([`decomposeParLevel`](https://bitbucket.org/drettenmaier/amr_lb_publication/src/master/OpenFOAM/applications/utilities/reconstructParLevel/reconstructParLevel.C))
     - Andrea Montorfano - Politecnico de Milano  (Discussions and hint for dontFlipPatch)
