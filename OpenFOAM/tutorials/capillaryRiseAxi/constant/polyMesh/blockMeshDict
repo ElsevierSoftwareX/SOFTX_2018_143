@@ -1,0 +1,146 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+
+//define(calc, [esyscmd(perl -e 'use Math::Trig; print ($1)')])
+
+
+
+
+
+
+
+
+
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// User-defined parameters
+
+convertToMeters 1;
+
+
+
+
+
+
+
+
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//Derived parameters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Parametric description
+
+  vertices
+  (
+      (0.0  0.0  0.0) // Vertex p0 = 0 
+      (0.00062440513849002   0.0 -2.72621170722033e-05) // Vertex p1 = 1 
+      (0.00062440513849002   0.010625    -2.72621170722033e-05) // Vertex p2 = 2 
+      (0.0  0.010625     0.0) // Vertex p3 = 3 
+
+      (0.0  0.0  0.0) // Vertex p4 = 4 
+      (0.00062440513849002   0.0  2.72621170722033e-05) // Vertex p5 = 5 
+      (0.00062440513849002   0.010625     2.72621170722033e-05) // Vertex p6 = 6 
+      (0.0  0.010625     0.0) // Vertex p7 = 7 
+
+  );
+
+  blocks
+  (
+      hex (0 1 2 3 4 5 6 7) (4 68 1) simpleGrading (1 1 1)
+
+  );
+
+  edges ( );
+
+boundary
+(
+    left
+    {
+        type symmetry;
+        faces
+        (
+                (4 7 3 0)
+        );
+    }
+
+    bottom
+    {
+        type patch;
+        faces
+        (
+                (1 5 4 0)
+        );
+    }
+
+    right
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)
+        );
+    }
+
+    top
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+
+    front
+    {
+        type wedge;
+        faces
+        (
+           (0 1 2 3)
+        );
+    }
+
+    back
+    {
+        type wedge;
+        faces
+        (
+           (6 5 4 7)
+        );
+    }
+
+  );
+
+ mergePatchPairs ( );

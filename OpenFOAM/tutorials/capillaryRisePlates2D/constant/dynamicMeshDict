@@ -1,0 +1,108 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      motionProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh   dynamicRefineBalancedFvMesh;
+
+multiCritRefinementControls
+{
+    enableMultiCritRefinementControl  true;
+    
+    fields // must be scalarFields
+    (
+    );
+    
+    interface // must be a scalarField (only one dictionary!)
+    (
+        alpha.water // refine interface (found based on snGrad of alpha > 0.1) 
+        {
+            innerRefLayers 7; // describes how many cell layers inside phase alpha are to be refined
+            outerRefLayers 7; // describes how many cell layers outside phase alpha are to be refined
+            // optional settings:
+            maxRefineLevel 2; // max refinement layers; Default: maxRefinement from dynamicRefineFvMeshCoeffs is used
+            // to get slower than 2:1 refinement; add #nAddLayers between each refinement level at the interface
+            nAddLayers 0; // default: nAddLayers=0 
+        }
+    );
+
+   
+    gradients // must be scalars
+    ();
+    
+    curls // must be vectors
+    ();
+   
+    regions
+    ();
+}
+
+dynamicRefineFvMeshCoeffs
+{
+    // Extra entries for balancing
+    enableBalancing true;
+    allowableImbalance 0.10;
+
+    // How often to refine
+    refineInterval  15;
+    
+    // Field to be refinement on (set it to 'internalRefinementField' to use the
+    // refinementControls dictionary entries above)
+    field           multiCritRefinementField;
+    
+    // Refine field inbetween lower..upper
+    lowerRefineLevel 0.5;
+    upperRefineLevel 2.5; // maxRefinement+0.5
+    
+    // If value < unrefineLevel unrefine
+    unrefineLevel   -0.5;
+    
+    // Have slower than 2:1 refinement
+    nBufferLayers   4;
+    
+    // Refine cells only up to maxRefinement levels
+    maxRefinement   2;
+    
+    // Stop refinement if maxCells reached
+    maxCells        200000;
+    
+    // Flux field and corresponding velocity field. Fluxes on changed
+    // faces get recalculated by interpolating the velocity. Use 'none'
+    // on surfaceScalarFields that do not need to be reinterpolated.
+    correctFluxes
+    (
+//        (phi Urel)
+        (phiAbs U)
+        (phiAbs_0 U_0)
+        (nHatf none)
+        (rho*phi none)
+        (ghf none)
+        (phi_0 U_0)
+        (alphaPhi none)
+        (rhoPhi none)
+        (phi none)
+        (flux(alpha.water) none)
+    );
+
+    mapSurfaceFields 
+    (
+        Uf
+        Uf_0
+    ); 
+    
+    // Write the refinement level as a volScalarField
+    dumpLevel       true;
+}
+
+// ************************************************************************* //

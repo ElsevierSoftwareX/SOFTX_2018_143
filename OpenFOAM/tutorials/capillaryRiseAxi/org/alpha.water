@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM Extend Project: Open source CFD        |
+|  \\    /   O peration     | Version:  1.6-ext                               |
+|   \\  /    A nd           | Web:      www.extend-project.de                 |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      alpha1;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+
+    left
+    {
+        type           symmetry;
+    }
+
+    bottom
+    {
+        type           fixedValue;
+       value           uniform 1;
+    }
+
+    right
+    {
+       type           myConstantAlphaContactAngle;
+       theta0         70;
+       limit          gradient;
+       value          uniform 0;
+    }
+
+    top
+    {
+       type           zeroGradient;
+       value          uniform 0;
+    }
+
+    front
+    {
+        type           wedge;
+    }
+
+    back
+    {
+        type           wedge;
+    }
+
+}
+
+
+// ************************************************************************* //
