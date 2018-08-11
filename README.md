@@ -38,7 +38,7 @@ Two unit cases illustrate the main bug fixes and several tutorial cases show pos
     - T.G. Voskuilen ([meshBalancing](https://github.com/tgvoskuilen/meshBalancing)) - Purdue University (Dynamic load balancing in OpenFOAM-2.3.x)
     - Timothee Pourpoint - Purdue Universit (Dynamic load balancing in OpenFOAM-2.3.x)  
     - Ahmad Baniabedalruhman - Michigan Technological University ([2D refinement](http://faculty.yu.edu.jo/ahmad_a/Lists/Other%20Academic%20Activities/AllItems.aspx))
-    - Stefan Batzdorf - Technical University Darmstadt ([`decomposeParLevel`](https://bitbucket.org/drettenmaier/amr_lb_publication/src/master/OpenFOAM/applications/utilities/reconstructParLevel/reconstructParLevel.C))
+    - Stefan Batzdorf - Technical University Darmstadt ([`decomposeParLevel`](https://bitbucket.org/dynamicloadbalancing/dynamicloadbalancing/src/v-dev/OpenFOAM/applications/utilities/decomposeParLevel/decomposeParLevel.C))
     - Andrea Montorfano - Politecnico de Milano  (Discussions and hint for dontFlipPatch)
 
 * * *
