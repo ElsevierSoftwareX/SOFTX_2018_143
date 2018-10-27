@@ -141,3 +141,14 @@ Will remove all time steps, even your `0` folder, all processor folders, `log.*`
 Will create a `case.foam` file in your case and in each `processor*` folder so you might load sub-domains separately into Paraview. 
 
 
+# Nice to know, Pitfalls and TODOs
+*   `decomposePar` will still flip the sign of any volSurfacFields
+*   Changing mesh with `topoSet` might create so-called protected cells. Once marked as protected they will not be refined with AMR. A dirty solution might be to delete the list of protected cells.
+*   The decomposition method `ptscotch` is not recomendable on a memory sensitive system. If the mesh changes slightly with AMR, the statistical seeding algorithm might create a new decomposition in which each cell is send to another processor. Since only one processor collects all fields to send them again, a huge memory peak is created.
+*   Boundary conditions that store a value need a proper dynamic mapping (see e.g. [alphaContactAngle](https://bitbucket.org/dynamicloadbalancing/dynamicloadbalancing/src/v-dev/OpenFOAM/src/twoPhaseProperties/constantAlphaContactAngle/myConstantAlphaContactAngleFvPatchScalarField.C?at=master))
+*   Multiple refinement criteria could also be realized with `functionObjects` 
+*   Patches that are not specified and treated as default(empty) boundary patch will cause the case to be read as a 2D case applying hexRef4
+*   Peroidic boundary condition might not work together with AMR & LB. Would be nice to get some feedback on that.
+
+
+
