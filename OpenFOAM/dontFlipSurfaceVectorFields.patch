@@ -1,13 +1,20 @@
+From 6479296e31892868de2e980da2b3c639fdfa7ffd Mon Sep 17 00:00:00 2001
+From: Daniel Rettenmaier <danielrettenmaier@gmail.com>
+Date: Thu, 14 Mar 2019 21:40:41 +0100
+Subject: [PATCH] BugFix: dont flip surfaceVectorFields
+
+---
+ .../mapping/fvFieldMappers/MapFvSurfaceField.H       | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
 diff --git a/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H b/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H
-index 40dfd16..a2698fb 100644
+index 40dfd16f7..7550bb806 100644
 --- a/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H
 +++ b/src/finiteVolume/interpolation/mapping/fvFieldMappers/MapFvSurfaceField.H
-@@ -70,7 +70,19 @@ void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
-     }
+@@ -71,6 +71,18 @@ void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
  
      field.autoMap(mapper.surfaceMap());
--
-+    
+ 
 +////////////////////////////////////////////////////////////////////////
 +// Andera Montorfano, Politecnico de Milano. Thank you very much!
 +// Daniel Deising fixed the idea :)
@@ -19,7 +26,10 @@ index 40dfd16..a2698fb 100644
 +       return;
 +    } 
 +////////////////////////////////////////////////////////////////////////
-+   
++
      // Flip the flux
      const labelList flipFaces = mapper.surfaceMap().flipFaceFlux().toc();
  
+-- 
+2.21.0
+
