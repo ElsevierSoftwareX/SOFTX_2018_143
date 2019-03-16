@@ -45,9 +45,9 @@ Two unit cases illustrate the main bug fixes and several tutorial cases show pos
 
 ### How do I get set up? ###
 * Checkout the branch which fits your OpenFOAM installation
-    - v-dev (commit OpenFOAM-dev: 9dcdf23a6b94a8d792d94664ccfd0d7948a5c905 )
-    - v5.x (commit OpenFOAM-dev: d06c3b390ac18dc2435ae87330038265a69c1c56 )
-    - v4.x (commit OpenFOAM-dev: d214c8dfd5ba56dd442bae186fd4fb50dd35c338 )
+    - v-dev (commit [OpenFOAM-dev](https://github.com/OpenFOAM/OpenFOAM-dev): `9dcdf23a6b94a8d792d94664ccfd0d7948a5c905` )
+    - v5.x (commit [OpenFOAM-dev](https://github.com/OpenFOAM/OpenFOAM-dev): `d06c3b390ac18dc2435ae87330038265a69c1c56` )
+    - v4.x (commit [OpenFOAM-dev](https://github.com/OpenFOAM/OpenFOAM-dev): `d214c8dfd5ba56dd442bae186fd4fb50dd35c338` )
 * Copy a patch into your OpenFOAM installation path
   ```cp -r OpenFOAM/dontFlipSurfaceVectorFields.patch $WM_PROJECT_DIR```
 * Have a short look inside the `*.patch` file. It is a minor change to your source code!
